@@ -1,0 +1,189 @@
+<!-- Breadcrumbs-->
+<ol class="breadcrumb">
+    <li class="breadcrumb-item">
+        <a href="/admin">Dashboard</a>
+    </li>
+    <li class="breadcrumb-item active">Course Management</li>
+</ol>
+
+<!-- Page Heading -->
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">All Courses</h1>
+    <a href="/admin/product/add" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+        <i class="fa fa-plus fa-sm text-white-50"></i> Add New Course
+    </a>
+</div>
+
+<!-- DataTales Example -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Course List</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Course Image</th>
+                    <th>Course Name</th>
+                    <th>Category</th>
+                    <th>Instructor</th>
+                    <th>Price</th>
+                    <th>Duration</th>
+                    <th>Students</th>
+                    <th>Rating</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>
+                        <img src="/img/course-1.jpg" alt="TOEIC Intensive" style="width: 60px; height: 40px; object-fit: cover; border-radius: 4px;">
+                    </td>
+                    <td><strong>TOEIC Intensive Course - Target 800+</strong></td>
+                    <td>TOEIC Preparation</td>
+                    <td>John Smith</td>
+                    <td>$199.00</td>
+                    <td>48 hours</td>
+                    <td>156</td>
+                    <td>
+                        <i class="fa fa-star text-warning"></i> 4.9
+                    </td>
+                    <td><span class="badge badge-success">Active</span></td>
+                    <td>
+                        <a href="/admin/product/edit/1" class="btn btn-sm btn-warning">
+                            <i class="fa fa-edit"></i> Edit
+                        </a>
+                        <button class="btn btn-sm btn-danger">
+                            <i class="fa fa-trash"></i> Delete
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>
+                        <img src="/img/course-2.jpg" alt="IELTS Mastery" style="width: 60px; height: 40px; object-fit: cover; border-radius: 4px;">
+                    </td>
+                    <td><strong>IELTS Mastery - Band 7.0+ Guaranteed</strong></td>
+                    <td>IELTS Academic</td>
+                    <td>Sarah Johnson</td>
+                    <td>$299.00</td>
+                    <td>60 hours</td>
+                    <td>89</td>
+                    <td>
+                        <i class="fa fa-star text-warning"></i> 4.8
+                    </td>
+                    <td><span class="badge badge-success">Active</span></td>
+                    <td>
+                        <a href="/admin/product/edit/2" class="btn btn-sm btn-warning">
+                            <i class="fa fa-edit"></i> Edit
+                        </a>
+                        <button class="btn btn-sm btn-danger">
+                            <i class="fa fa-trash"></i> Delete
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>
+                        <img src="/img/course-3.jpg" alt="TOEFL Preparation" style="width: 60px; height: 40px; object-fit: cover; border-radius: 4px;">
+                    </td>
+                    <td><strong>TOEFL Preparation - Target 100+ Points</strong></td>
+                    <td>TOEFL iBT</td>
+                    <td>Mike Davis</td>
+                    <td>$249.00</td>
+                    <td>52 hours</td>
+                    <td>67</td>
+                    <td>
+                        <i class="fa fa-star text-warning"></i> 4.7
+                    </td>
+                    <td><span class="badge badge-success">Active</span></td>
+                    <td>
+                        <a href="/admin/product/edit/3" class="btn btn-sm btn-warning">
+                            <i class="fa fa-edit"></i> Edit
+                        </a>
+                        <button class="btn btn-sm btn-danger">
+                            <i class="fa fa-trash"></i> Delete
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td>
+                        <img src="/img/course-1.jpg" alt="Business English" style="width: 60px; height: 40px; object-fit: cover; border-radius: 4px;">
+                    </td>
+                    <td><strong>Business English for Professionals</strong></td>
+                    <td>Business English</td>
+                    <td>Emily Wilson</td>
+                    <td>$179.00</td>
+                    <td>36 hours</td>
+                    <td>45</td>
+                    <td>
+                        <i class="fa fa-star text-warning"></i> 4.6
+                    </td>
+                    <td><span class="badge badge-success">Active</span></td>
+                    <td>
+                        <a href="/admin/product/edit/4" class="btn btn-sm btn-warning">
+                            <i class="fa fa-edit"></i> Edit
+                        </a>
+                        <button class="btn btn-sm btn-danger">
+                            <i class="fa fa-trash"></i> Delete
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td>
+                        <img src="/img/course-2.jpg" alt="Conversational English" style="width: 60px; height: 40px; object-fit: cover; border-radius: 4px;">
+                    </td>
+                    <td><strong>Daily Conversational English</strong></td>
+                    <td>Conversational English</td>
+                    <td>David Brown</td>
+                    <td>$129.00</td>
+                    <td>24 hours</td>
+                    <td>78</td>
+                    <td>
+                        <i class="fa fa-star text-warning"></i> 4.5
+                    </td>
+                    <td><span class="badge badge-success">Active</span></td>
+                    <td>
+                        <a href="/admin/product/edit/5" class="btn btn-sm btn-warning">
+                            <i class="fa fa-edit"></i> Edit
+                        </a>
+                        <button class="btn btn-sm btn-danger">
+                            <i class="fa fa-trash"></i> Delete
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td>
+                        <img src="/img/course-3.jpg" alt="Grammar Foundation" style="width: 60px; height: 40px; object-fit: cover; border-radius: 4px;">
+                    </td>
+                    <td><strong>English Grammar Foundation</strong></td>
+                    <td>General English</td>
+                    <td>Lisa Chen</td>
+                    <td>$99.00</td>
+                    <td>30 hours</td>
+                    <td>112</td>
+                    <td>
+                        <i class="fa fa-star text-warning"></i> 4.4
+                    </td>
+                    <td><span class="badge badge-warning">Inactive</span></td>
+                    <td>
+                        <a href="/admin/product/edit/6" class="btn btn-sm btn-warning">
+                            <i class="fa fa-edit"></i> Edit
+                        </a>
+                        <button class="btn btn-sm btn-danger">
+                            <i class="fa fa-trash"></i> Delete
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

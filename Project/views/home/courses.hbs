@@ -1,0 +1,343 @@
+<!-- Shop Controls Start -->
+<div class="container-xxl py-3">
+    <div class="container">
+        <div class="row g-3 align-items-center">
+            <div class="col-lg-6">
+                <div class="d-flex align-items-center">
+                    <span class="me-3">Sort by:</span>
+                    <select class="form-select" style="width: auto;">
+                        <option selected>Popularity</option>
+                        <option>Price: Low to High</option>
+                        <option>Price: High to Low</option>
+                        <option>Newest First</option>
+                        <option>Highest Rated</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-lg-6 text-end">
+                <div class="d-flex justify-content-end align-items-center">
+                    <span class="me-3">Show:</span>
+                    <select class="form-select me-3" style="width: auto;">
+                        <option selected>12</option>
+                        <option>24</option>
+                        <option>36</option>
+                    </select>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-primary active"><i class="fa fa-th"></i></button>
+                        <button type="button" class="btn btn-outline-primary"><i class="fa fa-list"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Shop Controls End -->
+
+<!-- Categories Start -->
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+            <h6 class="section-title bg-white text-center text-primary px-3">Exam Types</h6>
+            <h1 class="mb-5">Choose Your Test Preparation</h1>
+        </div>
+        <div class="row g-3">
+            <div class="col-lg-7 col-md-6">
+                <div class="row g-3">
+                    <div class="col-lg-12 col-md-12 wow zoomIn" data-wow-delay="0.1s">
+                        <a class="position-relative d-block overflow-hidden" href="/toeic">
+                            <img class="img-fluid" src="img/cat-1.jpg" alt="TOEIC Preparation">
+                            <div class="bg-white text-center position-absolute bottom-0 end-0 py-2 px-3" style="margin: 1px;">
+                                <h5 class="m-0">TOEIC Preparation</h5>
+                                <small class="text-primary">15 Courses</small>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-lg-6 col-md-12 wow zoomIn" data-wow-delay="0.3s">
+                        <a class="position-relative d-block overflow-hidden" href="/ielts">
+                            <img class="img-fluid" src="img/cat-2.jpg" alt="IELTS Academic">
+                            <div class="bg-white text-center position-absolute bottom-0 end-0 py-2 px-3" style="margin: 1px;">
+                                <h5 class="m-0">IELTS Academic</h5>
+                                <small class="text-primary">12 Courses</small>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-lg-6 col-md-12 wow zoomIn" data-wow-delay="0.5s">
+                        <a class="position-relative d-block overflow-hidden" href="/toefl">
+                            <img class="img-fluid" src="img/cat-3.jpg" alt="TOEFL iBT">
+                            <div class="bg-white text-center position-absolute bottom-0 end-0 py-2 px-3" style="margin: 1px;">
+                                <h5 class="m-0">TOEFL iBT</h5>
+                                <small class="text-primary">8 Courses</small>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-5 col-md-6 wow zoomIn" data-wow-delay="0.7s" style="min-height: 350px;">
+                <a class="position-relative d-block h-100 overflow-hidden" href="/business-english">
+                    <img class="img-fluid position-absolute w-100 h-100" src="img/cat-4.jpg" alt="Business English" style="object-fit: cover;">
+                    <div class="bg-white text-center position-absolute bottom-0 end-0 py-2 px-3" style="margin:  1px;">
+                        <h5 class="m-0">Business English</h5>
+                        <small class="text-primary">6 Courses</small>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Categories Start -->
+
+<!-- Courses Shop Start -->
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="row g-4">
+            <!-- Sidebar Filters -->
+            <div class="col-lg-3">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Filters</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Price Filter -->
+                        <div class="mb-4">
+                            <h6 class="mb-3">Price Range</h6>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>$99</span>
+                                <span>$499</span>
+                            </div>
+                            <input type="range" class="form-range" min="99" max="499" step="50">
+                        </div>
+
+                        <!-- Exam Type Filter -->
+                        <div class="mb-4">
+                            <h6 class="mb-3">Exam Type</h6>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="toeic">
+                                <label class="form-check-label" for="toeic">TOEIC</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="ielts">
+                                <label class="form-check-label" for="ielts">IELTS</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="toefl">
+                                <label class="form-check-label" for="toefl">TOEFL</label>
+                            </div>
+                        </div>
+
+                        <!-- Level Filter -->
+                        <div class="mb-4">
+                            <h6 class="mb-3">Level</h6>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="beginner">
+                                <label class="form-check-label" for="beginner">Beginner</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="intermediate">
+                                <label class="form-check-label" for="intermediate">Intermediate</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="advanced">
+                                <label class="form-check-label" for="advanced">Advanced</label>
+                            </div>
+                        </div>
+
+                        <!-- Rating Filter -->
+                        <div class="mb-4">
+                            <h6 class="mb-3">Rating</h6>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="rating5">
+                                <label class="form-check-label" for="rating5">
+                                    <i class="fa fa-star text-warning"></i>
+                                    <i class="fa fa-star text-warning"></i>
+                                    <i class="fa fa-star text-warning"></i>
+                                    <i class="fa fa-star text-warning"></i>
+                                    <i class="fa fa-star text-warning"></i>
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="rating4">
+                                <label class="form-check-label" for="rating4">
+                                    <i class="fa fa-star text-warning"></i>
+                                    <i class="fa fa-star text-warning"></i>
+                                    <i class="fa fa-star text-warning"></i>
+                                    <i class="fa fa-star text-warning"></i>
+                                    <i class="fa fa-star"></i> & Up
+                                </label>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary w-100">Apply Filters</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Courses Grid -->
+            <div class="col-lg-9">
+                <div class="row g-4">
+                    <!-- Course Item 1 -->
+                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                        <div class="course-item bg-light position-relative">
+                            <div class="position-relative overflow-hidden">
+                                <img class="img-fluid" src="img/course-1.jpg" alt="TOEIC Intensive Course">
+                                <div class="bg-primary text-white position-absolute top-0 end-0 m-3 py-1 px-2">
+                                    <small>BESTSELLER</small>
+                                </div>
+                                <div class="w-100 d-flex justify-content-center position-absolute bottom-0 start-0 mb-4">
+                                    <a href="#" class="flex-shrink-0 btn btn-sm btn-primary px-3 border-end" style="border-radius: 30px 0 0 30px;">View Details</a>
+                                    <a href="#" class="flex-shrink-0 btn btn-sm btn-primary px-3" style="border-radius: 0 30px 30px 0;">
+                                        <i class="fa fa-shopping-cart"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="text-center p-4 pb-0">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h3 class="mb-0 text-primary">$199.00</h3>
+                                    <small class="text-muted"><del>$299.00</del></small>
+                                </div>
+                                <div class="mb-3">
+                                    <small class="fa fa-star text-warning"></small>
+                                    <small class="fa fa-star text-warning"></small>
+                                    <small class="fa fa-star text-warning"></small>
+                                    <small class="fa fa-star text-warning"></small>
+                                    <small class="fa fa-star text-warning"></small>
+                                    <small class="ms-1">(245)</small>
+                                </div>
+                                <h5 class="mb-4">TOEIC Intensive Course - Target 800+</h5>
+                            </div>
+                            <div class="d-flex border-top">
+                                <small class="flex-fill text-center border-end py-2"><i class="fa fa-clock text-primary me-2"></i>48 Hrs</small>
+                                <small class="flex-fill text-center border-end py-2"><i class="fa fa-video text-primary me-2"></i>Online</small>
+                                <small class="flex-fill text-center py-2"><i class="fa fa-user text-primary me-2"></i>45 Students</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Course Item 2 -->
+                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
+                        <div class="course-item bg-light position-relative">
+                            <div class="position-relative overflow-hidden">
+                                <img class="img-fluid" src="img/course-2.jpg" alt="IELTS Mastery">
+                                <div class="bg-success text-white position-absolute top-0 end-0 m-3 py-1 px-2">
+                                    <small>POPULAR</small>
+                                </div>
+                                <div class="w-100 d-flex justify-content-center position-absolute bottom-0 start-0 mb-4">
+                                    <a href="#" class="flex-shrink-0 btn btn-sm btn-primary px-3 border-end" style="border-radius: 30px 0 0 30px;">View Details</a>
+                                    <a href="#" class="flex-shrink-0 btn btn-sm btn-primary px-3" style="border-radius: 0 30px 30px 0;">
+                                        <i class="fa fa-shopping-cart"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="text-center p-4 pb-0">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h3 class="mb-0 text-primary">$299.00</h3>
+                                    <small class="text-muted"><del>$399.00</del></small>
+                                </div>
+                                <div class="mb-3">
+                                    <small class="fa fa-star text-warning"></small>
+                                    <small class="fa fa-star text-warning"></small>
+                                    <small class="fa fa-star text-warning"></small>
+                                    <small class="fa fa-star text-warning"></small>
+                                    <small class="fa fa-star text-warning"></small>
+                                    <small class="ms-1">(189)</small>
+                                </div>
+                                <h5 class="mb-4">IELTS Mastery - Band 7.0+ Guaranteed</h5>
+                            </div>
+                            <div class="d-flex border-top">
+                                <small class="flex-fill text-center border-end py-2"><i class="fa fa-clock text-primary me-2"></i>60 Hrs</small>
+                                <small class="flex-fill text-center border-end py-2"><i class="fa fa-video text-primary me-2"></i>Online</small>
+                                <small class="flex-fill text-center py-2"><i class="fa fa-user text-primary me-2"></i>32 Students</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Course Item 3 -->
+                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
+                        <div class="course-item bg-light position-relative">
+                            <div class="position-relative overflow-hidden">
+                                <img class="img-fluid" src="img/course-3.jpg" alt="TOEFL Preparation">
+                                <div class="w-100 d-flex justify-content-center position-absolute bottom-0 start-0 mb-4">
+                                    <a href="#" class="flex-shrink-0 btn btn-sm btn-primary px-3 border-end" style="border-radius: 30px 0 0 30px;">View Details</a>
+                                    <a href="#" class="flex-shrink-0 btn btn-sm btn-primary px-3" style="border-radius: 0 30px 30px 0;">
+                                        <i class="fa fa-shopping-cart"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="text-center p-4 pb-0">
+                                <h3 class="mb-0 text-primary">$249.00</h3>
+                                <div class="mb-3">
+                                    <small class="fa fa-star text-warning"></small>
+                                    <small class="fa fa-star text-warning"></small>
+                                    <small class="fa fa-star text-warning"></small>
+                                    <small class="fa fa-star text-warning"></small>
+                                    <small class="fa fa-star text-warning"></small>
+                                    <small class="ms-1">(167)</small>
+                                </div>
+                                <h5 class="mb-4">TOEFL Preparation - Target 100+ Points</h5>
+                            </div>
+                            <div class="d-flex border-top">
+                                <small class="flex-fill text-center border-end py-2"><i class="fa fa-clock text-primary me-2"></i>52 Hrs</small>
+                                <small class="flex-fill text-center border-end py-2"><i class="fa fa-video text-primary me-2"></i>Online</small>
+                                <small class="flex-fill text-center py-2"><i class="fa fa-user text-primary me-2"></i>28 Students</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Add more course items as needed -->
+                </div>
+
+                <!-- Pagination -->
+                <nav aria-label="Page navigation" class="mt-5">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" tabindex="-1">Previous</a>
+                        </li>
+                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item">
+                            <a class="page-link" href="#">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Courses Shop End -->
+
+<!-- Testimonial Start -->
+<div class="container-xxl py-5 wow fadeInUp" data-wow-delay="0.1s">
+    <div class="container">
+        <div class="text-center">
+            <h6 class="section-title bg-white text-center text-primary px-3">Testimonial</h6>
+            <h1 class="mb-5">What Our Students Say!</h1>
+        </div>
+        <div class="owl-carousel testimonial-carousel position-relative">
+            <div class="testimonial-item text-center">
+                <img class="border rounded-circle p-2 mx-auto mb-3" src="img/testimonial-1.jpg" style="width: 80px; height: 80px;">
+                <h5 class="mb-0">Nguyen Van A</h5>
+                <p>Achieved TOEIC 850</p>
+                <div class="testimonial-text bg-light text-center p-4">
+                    <p class="mb-0">"The TOEIC course helped me improve from 600 to 850 in just 3 months. The practice tests were incredibly helpful!"</p>
+                </div>
+            </div>
+            <div class="testimonial-item text-center">
+                <img class="border rounded-circle p-2 mx-auto mb-3" src="img/testimonial-2.jpg" style="width: 80px; height: 80px;">
+                <h5 class="mb-0">Tran Thi B</h5>
+                <p>Achieved IELTS 7.5</p>
+                <div class="testimonial-text bg-light text-center p-4">
+                    <p class="mb-0">"Excellent IELTS preparation! The speaking practice with native teachers made all the difference for me."</p>
+                </div>
+            </div>
+            <div class="testimonial-item text-center">
+                <img class="border rounded-circle p-2 mx-auto mb-3" src="img/testimonial-3.jpg" style="width: 80px; height: 80px;">
+                <h5 class="mb-0">Le Van C</h5>
+                <p>Achieved TOEFL 105</p>
+                <div class="testimonial-text bg-light text-center p-4">
+                    <p class="mb-0">"Thanks to EnglishMaster, I got accepted into my dream university in the US. The TOEFL course was comprehensive!"</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Testimonial End -->
