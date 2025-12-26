@@ -12,7 +12,7 @@
                 <h6 class="m-0 font-weight-bold text-primary">Thông tin đề thi</h6>
             </div>
             <div class="card-body">
-                <form action="/admin/tests/edit/{{test._id}}" method="POST">
+                <form action="/admin/tests/edit/{{test._id}}?_method=PUT" method="POST">
                     <div class="form-group">
                         <label for="title">Tên đề thi <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="title" name="title" value="{{test.title}}" required>

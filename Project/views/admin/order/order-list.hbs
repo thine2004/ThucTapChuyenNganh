@@ -52,22 +52,22 @@
                                     <i class="fa fa-edit"></i>
                                 </button>
                                 <div class="dropdown-menu">
-                                    <form action="/admin/orders/update-status/{{this._id}}" method="POST">
+                                    <form action="/admin/orders/update-status/{{this._id}}?_method=PUT" method="POST">
                                         <input type="hidden" name="status" value="completed">
                                         <button type="submit" class="dropdown-item text-success">Hoàn thành</button>
                                     </form>
-                                    <form action="/admin/orders/update-status/{{this._id}}" method="POST" class="mt-1">
+                                    <form action="/admin/orders/update-status/{{this._id}}?_method=PUT" method="POST" class="mt-1">
                                         <input type="hidden" name="status" value="pending">
                                         <button type="submit" class="dropdown-item text-warning">Chờ xử lý</button>
                                     </form>
-                                    <form action="/admin/orders/update-status/{{this._id}}" method="POST" class="mt-1">
+                                    <form action="/admin/orders/update-status/{{this._id}}?_method=PUT" method="POST" class="mt-1">
                                         <input type="hidden" name="status" value="cancelled">
                                         <button type="submit" class="dropdown-item text-danger">Hủy đơn</button>
                                     </form>
                                 </div>
                             </div>
 
-                            <form action="/admin/orders/delete/{{this._id}}" method="POST" class="d-inline-block" onsubmit="return confirm('Bạn có chắc chắn muốn xóa đơn hàng này?');">
+                            <form action="/admin/orders/delete/{{this._id}}?_method=DELETE" method="POST" class="d-inline-block" onsubmit="return confirm('Bạn có chắc chắn muốn xóa đơn hàng này?');">
                                 <button type="submit" class="btn btn-sm btn-danger" title="Xóa đơn hàng">
                                     <i class="fa fa-trash"></i>
                                 </button>

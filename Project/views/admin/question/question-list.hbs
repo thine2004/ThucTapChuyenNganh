@@ -46,7 +46,7 @@
                         </td>
                         <td>
                             <a href="/admin/questions/edit/{{this._id}}" class="btn btn-sm btn-warning"><i class="fa fa-edit"></i></a>
-                            <form action="/admin/questions/delete/{{this._id}}" method="POST" style="display:inline;" onsubmit="return confirm('Xóa câu hỏi này?');">
+                            <form action="/admin/questions/delete/{{this._id}}?_method=DELETE" method="POST" style="display:inline;" onsubmit="return confirm('Xóa câu hỏi này?');">
                                 <button type="submit" class="btn btn-sm btn-danger"><i class="fa fa-trash"></i></button>
                             </form>
                         </td>

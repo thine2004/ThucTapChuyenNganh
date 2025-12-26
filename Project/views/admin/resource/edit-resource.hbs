@@ -12,7 +12,7 @@
                 <h6 class="m-0 font-weight-bold text-primary">Nội dung tài nguyên: {{resource.title}}</h6>
             </div>
             <div class="card-body">
-                <form action="/admin/resources/edit/{{resource._id}}" method="POST">
+                <form action="/admin/resources/edit/{{resource._id}}?_method=PUT" method="POST">
                     <div class="form-group">
                         <label for="title">Tiêu đề <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="title" name="title" required value="{{resource.title}}">

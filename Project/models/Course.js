@@ -29,12 +29,6 @@ const CourseSchema = new mongoose.Schema({
         ref: 'Category',
         required: true
     },
-    // Liên kết với User (Giảng viên)
-    instructor: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
-    },
     level: {
         type: String,
         enum: ['beginner', 'intermediate', 'advanced', 'all'],
@@ -58,6 +52,11 @@ const CourseSchema = new mongoose.Schema({
         type: Boolean,
         default: true // Khóa học có đang được bán không
     },
+    status: {
+        type: String,
+        enum: ['available', 'sold_out'],
+        default: 'available' // available: Còn khóa, sold_out: Hết khóa
+    },
     teachingMethod: {
         type: String,
         enum: ['online', 'offline', 'hybrid', 'all'],
@@ -66,5 +65,13 @@ const CourseSchema = new mongoose.Schema({
 }, {
     timestamps: true
 });
+
+// Add indexes for better query performance
+CourseSchema.index({ category: 1 });
+CourseSchema.index({ isActive: 1 });
+CourseSchema.index({ level: 1 });
+CourseSchema.index({ teachingMethod: 1 });
+CourseSchema.index({ price: 1 });
+CourseSchema.index({ averageRating: -1 });
 
 module.exports = mongoose.model('Course', CourseSchema);

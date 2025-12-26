@@ -56,7 +56,7 @@
                             <button class="btn btn-sm btn-info" data-toggle="modal" data-target="#replyModal{{this._id}}" title="Phản hồi/Cập nhật">
                                 <i class="fa fa-reply"></i>
                             </button>
-                            <form action="/admin/contacts/delete/{{this._id}}" method="POST" style="display: inline;" onsubmit="return confirm('Xóa liên hệ này?');">
+                            <form action="/admin/contacts/delete/{{this._id}}?_method=DELETE" method="POST" style="display: inline;" onsubmit="return confirm('Xóa liên hệ này?');">
                                 <button type="submit" class="btn btn-sm btn-danger" title="Xóa">
                                     <i class="fa fa-trash"></i>
                                 </button>
@@ -68,7 +68,7 @@
                     <div class="modal fade" id="replyModal{{this._id}}" tabindex="-1" role="dialog" aria-hidden="true">
                         <div class="modal-dialog" role="document">
                             <div class="modal-content">
-                                <form action="/admin/contacts/update/{{this._id}}" method="POST">
+                                <form action="/admin/contacts/update/{{this._id}}?_method=PUT" method="POST">
                                     <div class="modal-header">
                                         <h5 class="modal-title">Phản hồi liên hệ: {{this.name}}</h5>
                                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">

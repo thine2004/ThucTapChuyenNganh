@@ -21,7 +21,6 @@
                     <th>ID</th>
                     <th>Tên Danh mục</th>
                     <th>Mô tả</th>
-                    <th>Số lượng khóa</th>
                     <th>Trạng thái</th>
                     <th>Ngày tạo</th>
                     <th>Hành động</th>
@@ -33,7 +32,6 @@
                     <td>{{this._id}}</td>
                     <td><strong>{{this.name}}</strong></td>
                     <td>{{this.description}}</td>
-                    <td>-</td> <!-- Số lượng khóa học chưa tính -->
                     <td>
                         {{#if this.isActive}}
                             <span class="badge badge-success">Hoạt động</span>
@@ -46,7 +44,7 @@
                         <a href="/admin/category/edit/{{this._id}}" class="btn btn-sm btn-warning">
                             <i class="fa fa-edit"></i> Sửa
                         </a>
-                        <form action="/admin/category/delete/{{this._id}}" method="POST" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa danh mục này?');">
+                        <form action="/admin/category/delete/{{this._id}}?_method=DELETE" method="POST" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa danh mục này?');">
                             <button type="submit" class="btn btn-sm btn-danger">
                                 <i class="fa fa-trash"></i> Xóa
                             </button>
@@ -55,7 +53,7 @@
                 </tr>
                 {{else}}
                 <tr>
-                    <td colspan="7" class="text-center">Chưa có danh mục nào</td>
+                    <td colspan="6" class="text-center">Chưa có danh mục nào</td>
                 </tr>
                 {{/each}}
                 </tbody>

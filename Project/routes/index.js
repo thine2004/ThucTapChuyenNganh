@@ -11,6 +11,7 @@ const PracticeTest = require('../models/PracticeTest');
 const TestResult = require('../models/TestResult');
 const Resource = require('../models/Resource');
 const Question = require('../models/Question');
+const Lesson = require('../models/Lesson');
 
 // Middleware removed (query based login params)
 
@@ -125,12 +126,26 @@ router.get('/register', function (req, res, next) {
 
 router.get('/', async function(req, res, next) {
     try {
-        const [categories, popularCourses, instructors, testimonials] = await Promise.all([
-            Category.find({ isActive: true }).lean(),
-            Course.find({ isActive: true }).limit(3).populate('instructor').lean(),
-            User.find({ role: 'admin' }).limit(4).lean(),
-            Review.find({ rating: { $gte: 4 }, isActive: true }).sort({ createdAt: -1 }).limit(4).populate('user').lean()
+        const [categories, allCourses, instructors, testimonials] = await Promise.all([
+            Category.find({ isActive: true }).select('name description').lean(),
+            Course.find({ isActive: true })
+                .populate('category', 'name isActive')
+                .select('title price thumbnail averageRating category')
+                .limit(6)
+                .lean(),
+            User.find({ role: 'admin' }).select('firstName lastName avatar').limit(4).lean(),
+            Review.find({ rating: { $gte: 4 }, isActive: true })
+                .sort({ createdAt: -1 })
+                .limit(4)
+                .populate('user', 'firstName lastName')
+                .select('rating comment user')
+                .lean()
         ]);
+
+        // Filter courses with active categories only
+        const popularCourses = allCourses.filter(course => 
+            course.category && course.category.isActive
+        ).slice(0, 3);
 
         res.render('home/index', {
             title: 'EnglishMaster - Trang chủ',
@@ -152,8 +167,18 @@ router.get('/404', function(req, res, next) {
 });
 
 
-router.get('/about', function(req, res, next) {
-    res.render('home/about', { title: 'Về chúng tôi - EnglishMaster', activePage: 'about' });
+router.get('/about', async function(req, res, next) {
+    try {
+        const instructors = await User.find({ role: 'admin' }).select('firstName lastName avatar').limit(4).lean();
+        res.render('home/about', { 
+            title: 'Về chúng tôi - EnglishMaster', 
+            activePage: 'about',
+            instructors: instructors 
+        });
+    } catch (err) {
+        console.error(err);
+        next(err);
+    }
 });
 
 router.get('/contact', function(req, res, next) {
@@ -227,15 +252,20 @@ router.get('/courses', async function(req, res, next) {
         if (sort === 'rating') sortQuery = { averageRating: -1 };
 
         const [courses, categories, levels, methods] = await Promise.all([
-            Course.find(query).populate('instructor').populate('category').sort(sortQuery).lean(),
+            Course.find(query).populate('category').sort(sortQuery).lean(),
             Category.find({ isActive: true }).lean(),
             Course.distinct('level', { isActive: true }),
             Course.distinct('teachingMethod', { isActive: true })
         ]);
 
+        // Filter out courses whose category is inactive
+        const filteredCourses = courses.filter(course => 
+            course.category && course.category.isActive
+        );
+
         res.render('home/courses', { 
             title: 'Khóa học - EnglishMaster',
-            courses: courses,
+            courses: filteredCourses,
             categories: categories,
             levels: levels,
             methods: methods,
@@ -249,23 +279,68 @@ router.get('/courses', async function(req, res, next) {
          next(err);
     }
 });
+// Learn Course Route (Dashboard) - Defined BEFORE detail route to ensure matching
+router.get('/courses/:id/learn', async function(req, res, next) {
+    if (!req.isAuthenticated()) {
+        req.flash('error_message', 'Vui lòng đăng nhập để truy cập khóa học.');
+        return res.redirect('/login');
+    }
+
+    try {
+        const courseId = req.params.id;
+        
+        // Verify enrollment
+        const user = await User.findById(req.user._id);
+        const isEnrolled = user.enrolledCourses.some(id => id.toString() === courseId);
+        
+        if (!isEnrolled && req.user.role !== 'admin') { // Admin can access all
+             req.flash('error_message', 'Bạn chưa đăng ký khóa học này.');
+             return res.redirect('/courses/' + courseId);
+        }
+
+        const course = await Course.findById(courseId).lean();
+        if (!course) return res.redirect('/404');
+
+        const lessons = await Lesson.find({ course: courseId }).sort({ position: 1 }).lean();
+
+        res.render('home/course-lessons', {
+            title: 'Học: ' + course.title,
+            course: course,
+            lessons: lessons
+        });
+    } catch (err) {
+        console.error(err);
+        next(err);
+    }
+});
+
 // Course Detail
 router.get('/courses/:id', async function(req, res, next) {
     try {
-        const course = await Course.findById(req.params.id).populate('instructor').lean();
+        const course = await Course.findById(req.params.id).lean();
         if (!course) {
             return res.redirect('/404');
         }
         const categories = await Category.find({ isActive: true }).lean();
         const reviews = await Review.find({ course: req.params.id, isActive: true }).populate('user').sort({createdAt: -1}).lean();
+        const lessons = await Lesson.find({ course: req.params.id }).sort({ position: 1 }).lean();
         
+        // Fetch related courses
+        const relatedCourses = await Course.find({ 
+            category: course.category, 
+            _id: { $ne: course._id },
+            isActive: true 
+        })
+        .limit(3)
+        .lean();
+
         res.render('home/course-detail', { 
             title: course.title + ' - EnglishMaster',
             course: course,
             categories: categories,
-            course: course,
-            categories: categories,
             reviews: reviews,
+            lessons: lessons,
+            relatedCourses: relatedCourses,
             activePage: 'courses'
         });
     } catch (err) {
@@ -273,6 +348,7 @@ router.get('/courses/:id', async function(req, res, next) {
         next(err);
     }
 });
+
 
 router.post('/courses/:id/review', async function(req, res, next) {
     if (!req.isAuthenticated()) {
@@ -467,6 +543,9 @@ router.post('/checkout/confirm', async function(req, res, next) {
         // Clear cart
         req.session.cart = { items: [], totalQty: 0, totalPrice: 0 };
         
+        // Clear cached unlocked categories to force refresh
+        delete req.session.unlockedCategories;
+        
         req.flash('success_message', 'Đặt hàng thành công! Các khóa học đã được mở cho bạn trong Hồ sơ.');
         res.redirect('/profile');
 
@@ -484,7 +563,7 @@ router.get('/profile', async function(req, res, next) {
     }
 
     try {
-        const [orders, testResults, categories] = await Promise.all([
+        const [orders, testResults, categories, examCategories, userWithCourses] = await Promise.all([
             Order.find({ user: req.user._id })
                 .populate({
                     path: 'items.course',
@@ -499,14 +578,18 @@ router.get('/profile', async function(req, res, next) {
                 })
                 .sort({ createdAt: -1 })
                 .lean(),
-            Category.find({ isActive: true }).lean()
+            Category.find({ isActive: true }).lean(),
+            Category.find({ isExam: true }).lean(),
+            User.findById(req.user._id).populate('enrolledCourses').lean()
         ]);
 
         res.render('home/profile', {
             title: 'Hồ sơ cá nhân',
             orders: orders,
             testResults: testResults,
-            categories: categories
+            categories: categories,
+            examCategories: examCategories,
+            enrolledCourses: userWithCourses.enrolledCourses
         });
     } catch (err) {
         console.error(err);
@@ -614,6 +697,36 @@ router.post('/tests/:id/submit', async function(req, res, next) {
         });
 
         await newResult.save();
+
+        // --- TỰ ĐỘNG CẬP NHẬT TRÌNH ĐỘ NGƯỜI DÙNG (DYNAMIC) ---
+        const populatedTest = await PracticeTest.findById(testId).populate('category').lean();
+        if (populatedTest.category && populatedTest.category.isExam) {
+            const cat = populatedTest.category;
+            const catName = cat.name;
+            const user = await User.findById(req.user._id);
+            let currentScore = user.levels.get(catName) || 0;
+            
+            let newLevelScore = 0;
+            const ratio = score / test.totalScore;
+
+            // Specialized rounding logic
+            if (catName.toUpperCase().includes('IELTS')) {
+                newLevelScore = Math.round(ratio * cat.maxScore * 2) / 2;
+            } else if (catName.toUpperCase().includes('TOEIC')) {
+                newLevelScore = Math.min(cat.maxScore, Math.round(ratio * cat.maxScore / 5) * 5);
+            } else {
+                newLevelScore = Math.round(ratio * cat.maxScore);
+            }
+
+            if (newLevelScore > currentScore) {
+                user.levels.set(catName, newLevelScore);
+                await user.save();
+                console.log(`✅ Updated dynamic level for ${catName}: ${newLevelScore}`);
+            }
+        }
+        // -----------------------------------------------------
+        // ---------------------------------------------
+
         res.redirect(`/tests/${testId}/result/${newResult._id}`);
 
     } catch (err) {

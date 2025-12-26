@@ -25,7 +25,6 @@
                     <th>Họ tên</th>
                     <th>Email</th>
                     <th>Vai trò</th>
-                    <th>Số điện thoại</th>
                     <th>Trạng thái</th>
                     <th>Ngày tham gia</th>
                     <th>Hành động</th>
@@ -44,7 +43,6 @@
                                 <span class="badge badge-info">User</span>
                             {{/if_eq}}
                         </td>
-                        <td>{{this.phone}}</td>
                         <td>
                             {{#if this.isActive}}
                                 <span class="badge badge-success">Actived</span>
@@ -55,14 +53,14 @@
                         <td>{{this.createdAt}}</td>
                         <td style="white-space: nowrap;">
                             <a href="/admin/users/edit/{{this._id}}" class="btn btn-sm btn-warning" title="Sửa"><i class="fa fa-edit"></i></a>
-                            <form action="/admin/users/delete/{{this._id}}" method="POST" style="display:inline;" onsubmit="return confirm('Bạn có chắc muốn xóa người dùng này?');">
+                            <form action="/admin/users/delete/{{this._id}}?_method=DELETE" method="POST" style="display:inline;" onsubmit="return confirm('Bạn có chắc muốn xóa người dùng này?');">
                                 <button type="submit" class="btn btn-sm btn-danger" title="Xóa"><i class="fa fa-trash"></i></button>
                             </form>
                         </td>
                     </tr>
                 {{else}}
                     <tr>
-                        <td colspan="7" class="text-center">Chưa có người dùng nào.</td>
+                        <td colspan="6" class="text-center">Chưa có người dùng nào.</td>
                     </tr>
                 {{/each}}
                 </tbody>

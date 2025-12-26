@@ -22,10 +22,10 @@
                     <th>Hình ảnh</th>
                     <th>Tên khóa học</th>
                     <th>Danh mục</th>
-                    <th>Giảng viên</th>
                     <th>Giá</th>
                     <th>Thời lượng</th>
-                    <th>Học viên</th>
+                    <th>Trình độ</th>
+                    <th>Hình thức học</th>
                     <th>Đánh giá</th>
                     <th>Trạng thái</th>
                     <th>Hành động</th>
@@ -40,18 +40,50 @@
                     </td>
                     <td><strong>{{this.title}}</strong></td>
                     <td>{{this.category.name}}</td>
-                    <td>{{this.instructor.name}}</td>
-                    <td>{{this.price}}</td>
+                    <td>
+                        <strong class="text-success">{{this.price}}₫</strong>
+                        {{#if this.originalPrice}}
+                        <br>
+                        <small class="text-muted"><del>{{this.originalPrice}}₫</del></small>
+                        {{/if}}
+                    </td>
                     <td>{{this.duration}} phút</td>
-                    <td>-</td> <!-- Học viên -->
+                    <td>
+                        {{#if_eq this.level 'beginner'}}
+                            <span class="badge badge-info">Cơ bản</span>
+                        {{else if_eq this.level 'intermediate'}}
+                            <span class="badge badge-primary">Trung cấp</span>
+                        {{else if_eq this.level 'advanced'}}
+                            <span class="badge badge-danger">Nâng cao</span>
+                        {{else}}
+                            <span class="badge badge-secondary">Tất cả</span>
+                        {{/if_eq}}
+                    </td>
+                    <td>
+                        {{#if_eq this.teachingMethod 'online'}}
+                            <span class="badge badge-success">Online</span>
+                        {{else if_eq this.teachingMethod 'offline'}}
+                            <span class="badge badge-warning">Offline</span>
+                        {{else if_eq this.teachingMethod 'hybrid'}}
+                            <span class="badge badge-info">Hybrid</span>
+                        {{else}}
+                            <span class="badge badge-secondary">Tất cả</span>
+                        {{/if_eq}}
+                    </td>
                     <td>
                         <i class="fa fa-star text-warning"></i> {{this.averageRating}}
                     </td>
                     <td>
-                        {{#if this.isActive}}
-                            <span class="badge badge-success">Hoạt động</span>
+                        {{#if_eq this.status 'available'}}
+                            <span class="badge badge-success">Còn khóa</span>
                         {{else}}
-                            <span class="badge badge-secondary">Tạm ẩn</span>
+                            <span class="badge badge-warning">Hết khóa</span>
+                        {{/if_eq}}
+                        <br>
+                        {{#if this.isActive}}
+                            <span class="badge badge-primary mt-1">Hoạt động</span>
+                        {{else}}
+                            <span class="badge badge-secondary mt-1">Tạm ẩn</span>
                         {{/if}}
                     </td>
                     <td>

@@ -14,6 +14,21 @@
                 <label for="description">Mô tả</label>
                 <textarea class="form-control" id="description" name="description" rows="3"></textarea>
             </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <div class="form-check pt-4">
+                        <input type="checkbox" class="form-check-input" id="isExam" name="isExam" value="true">
+                        <label class="form-check-label" for="isExam">Là danh mục Luyện thi (Exams)</label>
+                        <small class="form-text text-muted">Nếu chọn, danh mục này sẽ hiển thị trong phần đánh giá năng lực của học viên.</small>
+                    </div>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="maxScore">Điểm tối đa (Max Score)</label>
+                    <input type="number" class="form-control" id="maxScore" name="maxScore" value="100">
+                    <small class="form-text text-muted">Ví dụ: IELTS là 9.0, TOEIC là 990.</small>
+                </div>
+            </div>
+
             <div class="form-group">
                 <div class="form-check">
                     <input type="checkbox" class="form-check-input" id="isActive" name="isActive" value="true" checked>

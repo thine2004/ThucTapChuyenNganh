@@ -70,10 +70,20 @@
                 <textarea class="form-control" id="description" name="description" rows="5" required></textarea>
             </div>
 
-            <div class="form-group">
-                <div class="custom-control custom-checkbox small">
-                    <input type="checkbox" class="custom-control-input" id="isActive" name="isActive" value="true" checked>
-                    <label class="custom-control-label" for="isActive">Hoạt động</label>
+
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="status">Tình trạng khóa học</label>
+                    <select class="form-control" id="status" name="status">
+                        <option value="available">Còn khóa</option>
+                        <option value="sold_out">Hết khóa</option>
+                    </select>
+                </div>
+                <div class="form-group col-md-6">
+                    <div class="custom-control custom-checkbox" style="margin-top: 38px;">
+                        <input type="checkbox" class="custom-control-input" id="isActive" name="isActive" value="true" checked>
+                        <label class="custom-control-label" for="isActive">Hoạt động</label>
+                    </div>
                 </div>
             </div>
 

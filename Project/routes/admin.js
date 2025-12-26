@@ -180,40 +180,58 @@ router.post('/users/add', function(req, res, next) {
 });
 
 // Edit User - GET
-router.get('/users/edit/:id', function(req, res, next) {
-    User.findById(req.params.id).lean().then(user => {
+router.get('/users/edit/:id', async function(req, res, next) {
+    try {
+        const user = await User.findById(req.params.id).lean();
+        const examCategories = await Category.find({ isExam: true }).lean();
+
         if (!user) {
             req.flash('error_message', 'Không tìm thấy người dùng');
             return res.redirect('/admin/users');
         }
+
+        // Convert Map to plain object for easier Handlebars access if needed
+        // But since we use .lean(), user.levels might already be a plain object 
+        // depending on how Mongoose Map handles lean().
+        
         res.render('admin/users/edit-user', {
              title: 'Sửa Người dùng',
-             user: user
+             user: user,
+             examCategories: examCategories
         });
-    }).catch(err => {
+    } catch (err) {
         console.error(err);
         res.redirect('/admin');
-    });
+    }
 });
 
-// Edit User - POST
-router.post('/users/edit/:id', function(req, res, next) {
-    const { firstName, lastName, role, phone, isActive } = req.body;
-    // Note: Password update logic is separate usually, or handled if field is present
+// Edit User - PUT
+router.put('/users/edit/:id', function(req, res, next) {
+    const { firstName, lastName, role, isActive, levels } = req.body;
     
-    User.findByIdAndUpdate(req.params.id, {
-        firstName,
-        lastName,
-        role,
-        phone,
-        isActive: !!isActive
-    }).then(user => {
+    User.findById(req.params.id).then(user => {
+        if (!user) return res.redirect('/admin/users');
+
+        user.firstName = firstName;
+        user.lastName = lastName;
+        user.role = role;
+        user.isActive = !!isActive;
+
+        // Update dynamic levels
+        if (levels && typeof levels === 'object') {
+            Object.keys(levels).forEach(key => {
+                user.levels.set(key, parseFloat(levels[key]) || 0);
+            });
+        }
+
+        return user.save();
+    }).then(() => {
         req.flash('success_message', 'Cập nhật thành công!');
         res.redirect('/admin/users');
     }).catch(err => {
         console.error(err);
         req.flash('error_message', 'Lỗi: ' + err.message);
-        res.redirect('/admin/users/edit/' + req.params.id);
+        res.redirect('/admin/users');
     });
 });
 
@@ -238,10 +256,12 @@ router.get('/category/add', function(req, res, next) {
 
 // Add Category - POST
 router.post('/category/add', function(req, res, next) {
-    const { name, description, isActive } = req.body;
+    const { name, description, isActive, isExam, maxScore } = req.body;
     const newCategory = new Category({
         name,
         description,
+        isExam: !!isExam,
+        maxScore: Number(maxScore) || 100,
         isActive: !!isActive
     });
     newCategory.save().then(() => {
@@ -272,9 +292,9 @@ router.get('/category/edit/:id', function(req, res, next) {
     });
 });
 
-// Edit Category - POST
-router.post('/category/edit/:id', function(req, res, next) {
-    const { name, description, isActive } = req.body;
+// Edit Category - PUT
+router.put('/category/edit/:id', function(req, res, next) {
+    const { name, description, isActive, isExam, maxScore } = req.body;
     Category.findById(req.params.id).then(category => {
         if (!category) {
             req.flash('error_message', 'Không tìm thấy danh mục');
@@ -283,6 +303,8 @@ router.post('/category/edit/:id', function(req, res, next) {
         category.name = name;
         category.description = description;
         category.isActive = !!isActive;
+        category.isExam = !!isExam;
+        category.maxScore = Number(maxScore) || 100;
         return category.save();
     }).then(() => {
         req.flash('success_message', 'Cập nhật danh mục thành công!');
@@ -294,8 +316,8 @@ router.post('/category/edit/:id', function(req, res, next) {
     });
 });
 
-// Delete Category - POST
-router.post('/category/delete/:id', async function(req, res, next) {
+// Delete Category - DELETE
+router.delete('/category/delete/:id', async function(req, res, next) {
     try {
         // Check if any courses are using this category
         const courseCount = await Course.countDocuments({ category: req.params.id });
@@ -318,7 +340,7 @@ router.post('/category/delete/:id', async function(req, res, next) {
 
 // Product list
 router.get('/product', function(req, res, next) {
-    Course.find().populate('category').populate('instructor').sort({ createdAt: -1 }).lean().then(products => {
+    Course.find().populate('category').sort({ createdAt: -1 }).lean().then(products => {
         res.render('admin/product/product-list', { 
             title: 'Quản lý Khóa học',
             products: products 
@@ -341,22 +363,21 @@ router.get('/product/add', function(req, res, next) {
 
 // Add Product - POST
 router.post('/product/add', function(req, res, next) {
-    const { title, category, price, originalPrice, duration, thumbnail, description, isActive, level, teachingMethod } = req.body;
-    
-    // Assumes the current logged in user is the instructor (admin is acting as one, or we should have a teacher selector)
-    // For now, use the current user ID
-    const instructor = req.user._id;
+    let { title, category, price, originalPrice, duration, thumbnail, description, isActive, status, level, teachingMethod } = req.body;
+
+    // Sanitize originalPrice
+    if (originalPrice === "") originalPrice = null;
 
     const newCourse = new Course({
         title,
         category,
-        instructor,
         price,
         originalPrice,
         duration,
         thumbnail,
         description,
         isActive: !!isActive,
+        status: status || 'available',
         level,
         teachingMethod
     });
@@ -392,9 +413,12 @@ router.get('/product/edit/:id', function(req, res, next) {
     });
 });
 
-// Edit Product - POST
-router.post('/product/edit/:id', function(req, res, next) {
-    const { title, category, price, originalPrice, duration, thumbnail, description, isActive, level, teachingMethod } = req.body;
+// Edit Product - PUT
+router.put('/product/edit/:id', function(req, res, next) {
+    let { title, category, price, originalPrice, duration, thumbnail, description, isActive, status, level, teachingMethod } = req.body;
+    
+    // Sanitize originalPrice
+    if (originalPrice === "") originalPrice = null;
     
     Course.findByIdAndUpdate(req.params.id, {
         title,
@@ -405,6 +429,7 @@ router.post('/product/edit/:id', function(req, res, next) {
         thumbnail,
         description,
         isActive: !!isActive,
+        status: status || 'available',
         level,
         teachingMethod
     }).then(() => {
@@ -419,8 +444,8 @@ router.post('/product/edit/:id', function(req, res, next) {
 
 
 
-// Delete User - POST
-router.post('/users/delete/:id', function(req, res, next) {
+// Delete User - DELETE
+router.delete('/users/delete/:id', function(req, res, next) {
     if (req.params.id == req.user._id) {
         req.flash('error_message', 'Không thể xóa tài khoản đang đăng nhập!');
         return res.redirect('/admin/users');
@@ -449,7 +474,8 @@ router.get('/contacts', function(req, res, next) {
     });
 });
 
-router.post('/contacts/update/:id', function(req, res, next) {
+// Update Contact - PUT
+router.put('/contacts/update/:id', function(req, res, next) {
     const { status, adminNotes } = req.body;
     Contact.findByIdAndUpdate(req.params.id, {
         status,
@@ -464,7 +490,8 @@ router.post('/contacts/update/:id', function(req, res, next) {
     });
 });
 
-router.post('/contacts/delete/:id', function(req, res, next) {
+// Delete Contact - DELETE
+router.delete('/contacts/delete/:id', function(req, res, next) {
     Contact.findByIdAndDelete(req.params.id).then(() => {
         req.flash('success_message', 'Đã xóa liên hệ thành công!');
         res.redirect('/admin/contacts');
@@ -557,7 +584,8 @@ router.get('/lessons/edit/:id', function(req, res, next) {
     });
 });
 
-router.post('/lessons/edit/:id', function(req, res, next) {
+// Edit Lesson - PUT
+router.put('/lessons/edit/:id', function(req, res, next) {
     const { title, course, videoUrl, content, duration, position, isFree } = req.body;
     Lesson.findByIdAndUpdate(req.params.id, {
         title, course, videoUrl, content, duration, position,
@@ -572,7 +600,8 @@ router.post('/lessons/edit/:id', function(req, res, next) {
     });
 });
 
-router.post('/lessons/delete/:id', function(req, res, next) {
+// Delete Lesson - DELETE
+router.delete('/lessons/delete/:id', function(req, res, next) {
     Lesson.findByIdAndDelete(req.params.id).then(() => {
         req.flash('success_message', 'Xóa bài học thành công!');
         res.redirect('/admin/lessons');
@@ -634,7 +663,8 @@ router.post('/questions/add', function(req, res, next) {
     });
 });
 
-router.post('/questions/delete/:id', function(req, res, next) {
+// Delete Question - DELETE
+router.delete('/questions/delete/:id', function(req, res, next) {
     Question.findByIdAndDelete(req.params.id).then(() => {
         req.flash('success_message', 'Xóa câu hỏi thành công!');
         res.redirect('/admin/questions');
@@ -689,8 +719,8 @@ router.post('/tests/add', function(req, res, next) {
     });
 });
 
-// Edit Test - POST
-router.post('/tests/edit/:id', async function(req, res, next) {
+// Edit Test - PUT
+router.put('/tests/edit/:id', async function(req, res, next) {
     const { title, category, description, duration, totalScore, passingScore, isActive, isFree } = req.body;
     try {
         await PracticeTest.findByIdAndUpdate(req.params.id, {
@@ -755,7 +785,8 @@ router.post('/tests/:testId/remove-question/:questionId', async function(req, re
     }
 });
 
-router.post('/tests/delete/:id', function(req, res, next) {
+// Delete Test - DELETE
+router.delete('/tests/delete/:id', function(req, res, next) {
     PracticeTest.findByIdAndDelete(req.params.id).then(() => {
         req.flash('success_message', 'Đã xóa đề thi.');
         res.redirect('/admin/tests');
@@ -813,7 +844,8 @@ router.get('/resources/edit/:id', function(req, res, next) {
     });
 });
 
-router.post('/resources/edit/:id', function(req, res, next) {
+// Edit Resource - PUT
+router.put('/resources/edit/:id', function(req, res, next) {
     const { title, type, content, thumbnail, isActive } = req.body;
     
     Resource.findById(req.params.id).then(resource => {
@@ -836,7 +868,8 @@ router.post('/resources/edit/:id', function(req, res, next) {
     });
 });
 
-router.post('/resources/delete/:id', function(req, res, next) {
+// Delete Resource - DELETE
+router.delete('/resources/delete/:id', function(req, res, next) {
     Resource.findByIdAndDelete(req.params.id).then(() => {
         req.flash('success_message', 'Xóa tài nguyên thành công!');
         res.redirect('/admin/resources');
@@ -884,7 +917,8 @@ router.get('/orders/detail/:id', async (req, res) => {
     }
 });
 
-router.post('/orders/delete/:id', async (req, res) => {
+// Delete Order - DELETE
+router.delete('/orders/delete/:id', async (req, res) => {
     try {
         await Order.findByIdAndDelete(req.params.id);
         req.flash('success_message', 'Đã xóa đơn hàng thành công!');
@@ -896,7 +930,8 @@ router.post('/orders/delete/:id', async (req, res) => {
     }
 });
 
-router.post('/orders/update-status/:id', async (req, res) => {
+// Update Order Status - PUT
+router.put('/orders/update-status/:id', async (req, res) => {
     try {
         const { status } = req.body;
         const order = await Order.findById(req.params.id);

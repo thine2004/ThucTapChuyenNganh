@@ -74,27 +74,49 @@
                 <div class="course-item bg-light">
                     <div class="position-relative overflow-hidden">
                         <img class="img-fluid" src="{{this.thumbnail}}" alt="{{this.title}}">
+                        
+                        {{!-- Status Badge --}}
+                        {{#if_eq this.status 'sold_out'}}
+                        <div class="bg-warning text-dark position-absolute top-0 start-0 m-3 py-1 px-2">
+                            <small><strong>HẾT KHÓA</strong></small>
+                        </div>
+                        {{/if_eq}}
+                        
+                        {{!-- Discount Badge --}}
+                        {{#if this.originalPrice}}
+                        <div class="bg-danger text-white position-absolute top-0 end-0 m-3 py-1 px-2">
+                            <small>GIẢM GIÁ</small>
+                        </div>
+                        {{/if}}
+
                         <div class="w-100 d-flex justify-content-center position-absolute bottom-0 start-0 mb-4">
                             <a href="/courses/{{this._id}}" class="flex-shrink-0 btn btn-sm btn-primary px-3 border-end" style="border-radius: 30px 0 0 30px;">Chi Tiết</a>
+                            {{#if_eq this.status 'available'}}
                             <a href="/cart/add/{{this._id}}" class="flex-shrink-0 btn btn-sm btn-primary px-3" style="border-radius: 0 30px 30px 0;">Đăng Ký</a>
+                            {{else}}
+                            <button class="flex-shrink-0 btn btn-sm btn-secondary px-3" style="border-radius: 0 30px 30px 0;" disabled>Hết Chỗ</button>
+                            {{/if_eq}}
                         </div>
                     </div>
                     <div class="text-center p-4 pb-0">
-                        <h3 class="mb-0">{{this.price}}₫</h3>
+                        <h3 class="mb-0">
+                            {{formatCurrency this.price}}
+                            {{#if this.originalPrice}}
+                            <small class="text-muted fs-6" style="font-size: 0.6em !important;"><del>{{formatCurrency this.originalPrice}}</del></small>
+                            {{/if}}
+                        </h3>
                         <div class="mb-3">
-                            <small class="fa fa-star text-primary"></small>
-                            <small class="fa fa-star text-primary"></small>
-                            <small class="fa fa-star text-primary"></small>
-                            <small class="fa fa-star text-primary"></small>
-                            <small class="fa fa-star text-primary"></small>
-                            <small>({{this.averageRating}})</small>
+                            {{#each (range 1 5)}}
+                                <small class="fa fa-star {{#if (lte this ../averageRating)}}text-warning{{else}}text-muted{{/if}}"></small>
+                            {{/each}}
+                            <small class="ms-1">({{this.averageRating}})</small>
                         </div>
                         <h5 class="mb-4">{{this.title}}</h5>
                     </div>
                     <div class="d-flex border-top">
-                        <small class="flex-fill text-center border-end py-2"><i class="fa fa-user-tie text-primary me-2"></i>{{this.instructor.name}}</small>
-                        <small class="flex-fill text-center border-end py-2"><i class="fa fa-clock text-primary me-2"></i>{{this.duration}} hrs</small>
-                        <small class="flex-fill text-center py-2"><i class="fa fa-user text-primary me-2"></i>-</small>
+                        <small class="flex-fill text-center border-end py-2"><i class="fa fa-clock text-primary me-2"></i>{{this.duration}} phút</small>
+                        <small class="flex-fill text-center border-end py-2"><i class="fa fa-video text-primary me-2"></i>{{courseMethod this.teachingMethod}}</small>
+                        <small class="flex-fill text-center py-2"><i class="fa fa-layer-group text-primary me-2"></i>{{courseLevel this.level}}</small>
                     </div>
                 </div>
             </div>

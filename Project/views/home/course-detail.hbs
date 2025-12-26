@@ -5,6 +5,10 @@
             <div class="col-lg-8 wow fadeInUp" data-wow-delay="0.1s">
                 <div class="position-relative overflow-hidden mb-5">
                     <img class="img-fluid w-100" src="{{course.thumbnail}}" alt="{{course.title}}" style="border-radius: 5px;">
+                    
+                    {{!-- Status Badge --}}
+                    {{statusBadge course.status}}
+
                     {{#if course.originalPrice}}
                     <div class="bg-danger text-white position-absolute top-0 end-0 m-3 py-1 px-2">
                         <small>GIẢM GIÁ</small>
@@ -13,22 +17,59 @@
                 </div>
                 <h1 class="mb-4">{{course.title}}</h1>
                 <div class="d-flex mb-3">
-                    <small class="me-3"><i class="fa fa-user text-primary me-2"></i>{{course.instructor.name}}</small>
                     <small class="me-3"><i class="fa fa-clock text-primary me-2"></i>{{course.duration}} phút</small>
                     <small class="me-3"><i class="fa fa-star text-warning me-2"></i>{{course.averageRating}}</small>
                 </div>
-                <h3 class="mb-4 text-primary">{{course.price}}₫ 
+                <h3 class="mb-4 text-primary">{{formatCurrency course.price}}
                     {{#if course.originalPrice}}
-                    <span class="text-muted fs-5"><del>{{course.originalPrice}}₫</del></span>
+                    <span class="text-muted fs-5"><del>{{formatCurrency course.originalPrice}}</del></span>
                     {{/if}}
                 </h3>
                 <p class="mb-4">{{course.description}}</p>
                 
                 <div class="d-flex align-items-center mb-4">
+                    {{#if_eq course.status 'available'}}
                     <form action="/cart/add/{{course._id}}" method="POST">
                         <button type="submit" class="btn btn-primary py-3 px-5"><i class="fa fa-shopping-cart me-2"></i>Đăng Ký Khóa Học Ngay</button>
                     </form>
+                    {{else}}
+                    <button class="btn btn-secondary py-3 px-5" disabled><i class="fa fa-ban me-2"></i>Khóa Học Đã Hết Chỗ</button>
+                    {{/if_eq}}
                 </div>
+
+                <!-- Curriculum Section -->
+                {{#if lessons}}
+                <div class="mb-5">
+                    <h4 class="mb-4">Nội dung khóa học</h4>
+                    <div class="accordion" id="accordionExample">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingOne">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                    Danh sách bài học ({{lessons.length}} bài)
+                                </button>
+                            </h2>
+                            <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                                <div class="accordion-body p-0">
+                                    <ul class="list-group list-group-flush">
+                                        {{#each lessons}}
+                                        <li class="list-group-item d-flex justify-content-between align-items-center px-4 py-3">
+                                            <span>
+                                                <i class="fa fa-play-circle text-primary me-2"></i>
+                                                {{this.title}}
+                                                {{#if this.isFree}}
+                                                <span class="badge bg-info ms-2">Học thử</span>
+                                                {{/if}}
+                                            </span>
+                                            <span class="text-secondary">{{this.duration}} phút</span>
+                                        </li>
+                                        {{/each}}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {{/if}}
 
                 <!-- Reviews Section -->
                 <div class="mt-5">
@@ -93,9 +134,8 @@
             <div class="col-lg-4 wow fadeInUp" data-wow-delay="0.3s">
                 <div class="bg-light p-4 mb-5">
                     <h4 class="mb-4">Thông tin khóa học</h4>
-                    <div class="d-flex justify-content-between mb-3">
-                        <span>Giảng viên:</span>
-                        <span class="text-secondary">{{course.instructor.name}}</span>
+                    <div class="d-flex justify-content-between mb-3 text-secondary">
+                        <span><i class="fa fa-check text-primary me-2"></i>Truy cập trọn đời</span>
                     </div>
                     <div class="d-flex justify-content-between mb-3">
                         <span>Thời lượng:</span>
@@ -103,7 +143,19 @@
                     </div>
                     <div class="d-flex justify-content-between mb-3">
                         <span>Trình độ:</span>
-                        <span class="text-secondary">Tất cả</span>
+                        <span class="text-secondary">{{courseLevel course.level}}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Hình thức học:</span>
+                        <span class="text-secondary">{{courseMethod course.teachingMethod}}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Tình trạng:</span>
+                        <span class="{{#if_eq course.status 'available'}}text-success{{else}}text-warning{{/if_eq}} fw-bold">
+                            {{#if_eq course.status 'available'}}Còn khóa
+                            {{else}}Hết khóa
+                            {{/if_eq}}
+                        </span>
                     </div>
                     <div class="d-flex justify-content-between mb-3">
                         <span>Ngôn ngữ:</span>
@@ -111,8 +163,37 @@
                     </div>
                      <div class="d-flex justify-content-between">
                         <span>Giá:</span>
-                        <span class="text-primary fw-bold">{{course.price}}₫</span>
+                        <div class="text-end">
+                            <span class="text-primary fw-bold">{{formatCurrency course.price}}</span>
+                            {{#if course.originalPrice}}
+                            <br>
+                            <small class="text-muted"><del>{{formatCurrency course.originalPrice}}</del></small>
+                            {{/if}}
+                        </div>
                     </div>
+                </div>
+
+                <!-- Lesson List Widget (Sidebar) -->
+                <div class="bg-light p-4 mb-5">
+                    <h4 class="mb-4">Bài học trong khóa</h4>
+                    {{#if lessons}}
+                    <div class="list-group list-group-flush">
+                        {{#each lessons}}
+                        <div class="list-group-item d-flex justify-content-between align-items-center bg-transparent border-bottom px-0 py-2">
+                            <div class="text-truncate pe-2">
+                                <i class="fa fa-play-circle text-primary me-2"></i>
+                                <span title="{{this.title}}">{{this.title}}</span>
+                                {{#if this.isFree}}
+                                <span class="badge bg-info ms-1" style="font-size: 0.6rem;">Free</span>
+                                {{/if}}
+                            </div>
+                            <small class="text-muted text-nowrap">{{this.duration}}p</small>
+                        </div>
+                        {{/each}}
+                    </div>
+                    {{else}}
+                    <p class="text-muted small">Đang cập nhật bài học...</p>
+                    {{/if}}
                 </div>
 
                 <div class="bg-light p-4 mb-5">
@@ -127,5 +208,65 @@
                 </div>
             </div>
         </div>
-    </div>
-</div>
+
+        <!-- Related Courses -->
+        {{#if relatedCourses}}
+        <div class="row g-5 mt-4">
+            <div class="col-12 wow fadeInUp" data-wow-delay="0.1s">
+                <h3 class="mb-4">Khóa học liên quan</h3>
+            </div>
+            {{#each relatedCourses}}
+            <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                <div class="course-item bg-light position-relative h-100 d-flex flex-column">
+                    <div class="position-relative overflow-hidden">
+                        <img class="img-fluid" src="{{this.thumbnail}}" alt="{{this.title}}" style="height: 200px; width: 100%; object-fit: cover;">
+                        
+                        {{!-- Status Badge --}}
+                        {{statusBadge this.status}}
+                        
+                        {{#if this.originalPrice}}
+                        <div class="bg-danger text-white position-absolute top-0 end-0 m-3 py-1 px-2">
+                            <small>GIẢM GIÁ</small>
+                        </div>
+                        {{/if}}
+                        
+                        <div class="w-100 d-flex justify-content-center position-absolute bottom-0 start-0 mb-4">
+                            <a href="/courses/{{this._id}}" class="flex-shrink-0 btn btn-sm btn-primary px-3 border-end" style="border-radius: 30px 0 0 30px;">Chi tiết</a>
+                            {{#if_eq this.status 'available'}}
+                            <form action="/cart/add/{{this._id}}" method="POST" class="flex-shrink-0 m-0 p-0">
+                                <button type="submit" class="btn btn-sm btn-primary px-3" style="border-radius: 0 30px 30px 0;">
+                                    <i class="fa fa-shopping-cart"></i>
+                                </button>
+                            </form>
+                            {{else}}
+                            <button class="btn btn-sm btn-secondary px-3" style="border-radius: 0 30px 30px 0;" disabled>
+                                <i class="fa fa-ban"></i>
+                            </button>
+                            {{/if_eq}}
+                        </div>
+                    </div>
+                    <div class="text-center p-4 pb-0 flex-grow-1">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h3 class="mb-0 text-primary">{{formatCurrency this.price}}</h3>
+                            {{#if this.originalPrice}}
+                            <small class="text-muted"><del>{{formatCurrency this.originalPrice}}</del></small>
+                            {{/if}}
+                        </div>
+                        <div class="mb-3">
+                            {{#each (range 1 5)}}
+                                <small class="fa fa-star {{#if (lte this ../averageRating)}}text-warning{{else}}text-muted{{/if}}"></small>
+                            {{/each}}
+                            <small class="ms-1">({{this.averageRating}})</small>
+                        </div>
+                        <h5 class="mb-4">{{this.title}}</h5>
+                    </div>
+                    <div class="d-flex border-top">
+                        <small class="flex-fill text-center border-end py-2"><i class="fa fa-clock text-primary me-2"></i>{{this.duration}} phút</small>
+                        <small class="flex-fill text-center border-end py-2"><i class="fa fa-video text-primary me-2"></i>{{courseMethod this.teachingMethod}}</small>
+                        <small class="flex-fill text-center py-2"><i class="fa fa-layer-group text-primary me-2"></i>{{courseLevel this.level}}</small>
+                    </div>
+                </div>
+            </div>
+            {{/each}}
+        </div>
+        {{/if}}

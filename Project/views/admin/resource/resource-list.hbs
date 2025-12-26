@@ -39,7 +39,7 @@
                         <td>{{this.createdAt}}</td>
                         <td>
                             <a href="/admin/resources/edit/{{this._id}}" class="btn btn-sm btn-warning"><i class="fa fa-edit"></i></a>
-                            <form action="/admin/resources/delete/{{this._id}}" method="POST" style="display:inline;" onsubmit="return confirm('Xóa tài nguyên này?');">
+                            <form action="/admin/resources/delete/{{this._id}}?_method=DELETE" method="POST" style="display:inline;" onsubmit="return confirm('Xóa tài nguyên này?');">
                                 <button type="submit" class="btn btn-sm btn-danger"><i class="fa fa-trash"></i></button>
                             </form>
                         </td>

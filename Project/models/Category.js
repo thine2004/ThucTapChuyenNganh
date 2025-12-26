@@ -20,6 +20,14 @@ const CategorySchema = new mongoose.Schema({
     isActive: {
         type: Boolean,
         default: true
+    },
+    isExam: {
+        type: Boolean,
+        default: false
+    },
+    maxScore: {
+        type: Number,
+        default: 100
     }
 }, {
     timestamps: true

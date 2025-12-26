@@ -22,7 +22,6 @@ const UserSchema = new mongoose.Schema({
         required: true,
         minlength: 6
     },
-    phone: String,
     avatar: {
         type: String,
         default: '/img/default-avatar.jpg'
@@ -40,9 +39,20 @@ const UserSchema = new mongoose.Schema({
     enrolledCourses: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Course'
-    }]
+    }],
+    levels: {
+        type: Map,
+        of: Number,
+        default: {}
+    }
 }, {
     timestamps: true
 });
+
+
+// Add indexes for better query performance
+// Note: email already has index from unique: true
+UserSchema.index({ role: 1 });
+UserSchema.index({ isActive: 1 });
 
 module.exports = mongoose.model('User', UserSchema);

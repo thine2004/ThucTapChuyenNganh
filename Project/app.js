@@ -11,12 +11,21 @@ const passport = require('passport'); // Added Passport
 const LocalStrategy = require('passport-local').Strategy; // Added LocalStrategy
 const User = require('./models/User'); 
 const flash = require('connect-flash');
+const methodOverride = require('method-override');
+const Handlebars = require('handlebars'); // Add this line
 
-// --- CẤU HÌNH DATABASE (Theo yêu cầu) ---
+
+// --- CẤU HÌNH DATABASE (OPTIMIZED) ---
 mongoose.Promise = global.Promise;
 const dbUrl = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/English';
 
-mongoose.connect(dbUrl)
+mongoose.connect(dbUrl, {
+    maxPoolSize: 10,
+    minPoolSize: 2,
+    serverSelectionTimeoutMS: 5000,
+    socketTimeoutMS: 45000,
+    family: 4
+})
   .then(() => {
     console.log("✅ MongoDB connected successfully!");
   })
@@ -55,7 +64,10 @@ passport.serializeUser((user, done) => {
 
 passport.deserializeUser(async (id, done) => {
     try {
-        const user = await User.findById(id);
+        // Only select necessary fields for better performance
+        const user = await User.findById(id)
+            .select('firstName lastName email role isActive enrolledCourses levels')
+            .lean();
         done(null, user);
     } catch (err) {
         done(err, null);
@@ -127,14 +139,46 @@ app.engine('hbs', engine({
         },
         formatDate: function(date) {
             if (!date) return "";
-            const d = new Date(date);
-            return d.toLocaleDateString('vi-VN', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
+            return new Date(date).toLocaleDateString("vi-VN");
+        },
+        // --- NEW OPTIMIZED HELPERS ---
+        formatCurrency: function(value) {
+            if (!value) return '0₫';
+            return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + '₫';
+        },
+        courseLevel: function(level) {
+            const map = {
+                'beginner': 'Cơ bản',
+                'intermediate': 'Trung cấp',
+                'advanced': 'Nâng cao',
+                'all': 'Tất cả'
+            };
+            return map[level] || level;
+        },
+        courseMethod: function(method) {
+            const map = {
+                'online': 'Online',
+                'offline': 'Offline',
+                'hybrid': 'Kết hợp'
+            };
+            return map[method] || method;
+        },
+        statusBadge: function(status) {
+            if (status === 'sold_out') {
+                return new Handlebars.SafeString('<span class="badge badge-warning">Hết khóa</span>');
+            }
+            return new Handlebars.SafeString('<span class="badge badge-success">Còn khóa</span>');
+        },
+        getMapValue: function(map, key) {
+            if (!map) return 0;
+            if (map instanceof Map) {
+                return map.get(key) || 0;
+            }
+            return map[key] || 0;
+        },
+        percentage: function(score, max) {
+            if (!max || max == 0) return 0;
+            return Math.min(100, Math.round((Number(score) / Number(max)) * 100));
         }
     }
 }));
@@ -147,6 +191,7 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Session configuration
@@ -165,53 +210,61 @@ app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Set up locals for all views
+// Set up locals for all views (OPTIMIZED)
 app.use(async (req, res, next) => {
     // Check session for authentication (Passport uses req.user)
-    res.locals.isLoggedIn = !!req.user; // Changed from req.session.isAuthenticated
+    res.locals.isLoggedIn = !!req.user;
     res.locals.currentUserName = req.user ? (req.user.firstName + ' ' + req.user.lastName) : '';
     res.locals.currentUserRole = req.user ? req.user.role : '';
 
-    // Fetch full user object if logged in (Already in req.user due to deserialize, but we might want populated data)
-    // Passport's deserializeUser above returns the user doc.
-    // However, the original code had population logic. Let's keep it or optimize.
-    // Passport deserialize typically is just ID -> User. 
-    // The original logic populated enrolledCourses. 
-    // Let's modify deserializeUser to populate OR do it here. 
-    // Doing it here is safer to avoid affecting every request if not needed, but local variables are for views.
-    
+    // Optimize: Only fetch enrolled courses when needed (not on every request)
+    // We'll set a basic user object and let specific routes fetch enrolledCourses if needed
     if (req.user) {
-        // Re-populate if needed or rely on what deserialize gave us.
-        // Let's re-fetch to be consistent with original logic (populating courses)
-        try {
-            const user = await User.findById(req.user._id).populate({
-                path: 'enrolledCourses',
-                populate: { path: 'category' }
-            }).lean();
-            res.locals.user = user;
-            if (user && user.enrolledCourses) {
-                res.locals.unlockedCategories = user.enrolledCourses.map(c => c.category ? c.category.name.toUpperCase() : '');
-            } else {
-                res.locals.unlockedCategories = [];
+        res.locals.user = req.user;
+        // Cache unlockedCategories in session to avoid repeated DB queries
+        if (!req.session.unlockedCategories) {
+            try {
+                const user = await User.findById(req.user._id)
+                    .populate({
+                        path: 'enrolledCourses',
+                        select: 'category', // Only select category field
+                        populate: { path: 'category', select: 'name' } // Only select name
+                    })
+                    .lean();
+                
+                if (user && user.enrolledCourses) {
+                    req.session.unlockedCategories = user.enrolledCourses
+                        .map(c => c.category ? c.category.name.toUpperCase() : '')
+                        .filter(Boolean);
+                } else {
+                    req.session.unlockedCategories = [];
+                }
+            } catch (err) {
+                console.error("Error fetching user for locals:", err);
+                req.session.unlockedCategories = [];
             }
-        } catch (err) {
-             console.error("Error fetching user for locals:", err);
-             res.locals.unlockedCategories = [];
         }
+        res.locals.unlockedCategories = req.session.unlockedCategories || [];
     } else {
         res.locals.unlockedCategories = [];
+        // Clear cache when user logs out
+        if (req.session.unlockedCategories) {
+            delete req.session.unlockedCategories;
+        }
     }
 
     // Messages and user data
-    // Passport puts authentication errors in 'error' flash by default if failureFlash: true
     res.locals.success_message = req.flash('success_message');
     res.locals.error_message = req.flash('error_message');
-    res.locals.passport_error = req.flash('error'); // Standard passport error
+    res.locals.error = req.flash('error');
+    res.locals.errors = req.flash('errors');
+    
+    res.locals.passport_error = res.locals.error; 
     if (res.locals.passport_error.length > 0) {
-        res.locals.error_message = res.locals.passport_error; // Merge to common variable
+        res.locals.error_message = res.locals.passport_error;
     }
 
-    res.locals.message = req.query.message || req.session.message || ''; // Keep backward compatibility
+    res.locals.message = req.query.message || req.session.message || '';
 
     // Clear any session messages after they're used
     if (req.session.message) delete req.session.message;
