@@ -377,8 +377,18 @@ router.post('/courses/:id/review', async function(req, res, next) {
 });
 
 
-router.get('/team', function(req, res, next) {
-    res.render('home/team', { title: 'Đội ngũ giảng viên - EnglishMaster', activePage: 'team' });
+router.get('/team', async function(req, res, next) {
+    try {
+        const instructors = await User.find({ role: 'admin' }).select('firstName lastName avatar').limit(4).lean();
+        res.render('home/team', { 
+            title: 'Đội ngũ giảng viên - EnglishMaster', 
+            activePage: 'team',
+            instructors: instructors 
+        });
+    } catch (err) {
+        console.error(err);
+        next(err);
+    }
 });
 
 router.get('/testimonial', function(req, res, next) {
