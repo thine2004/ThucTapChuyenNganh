@@ -1,0 +1,72 @@
+<!-- Page Heading -->
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Quản lý Tất cả Người dùng</h1>
+    <a href="/admin/users/add" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+        <i class="fa fa-user-plus fa-sm text-white-50"></i> Thêm Người dùng mới
+    </a>
+</div>
+
+<!-- Filters (Optional) -->
+<div class="mb-3">
+    <a href="/admin/users" class="btn btn-sm btn-secondary {{#unless currentRole}}active{{/unless}}">Tất cả</a>
+    <a href="/admin/users?role=user" class="btn btn-sm btn-info {{#if_eq currentRole 'user'}}active{{/if_eq}}">Người dùng</a>
+    <a href="/admin/users?role=admin" class="btn btn-sm btn-warning {{#if_eq currentRole 'admin'}}active{{/if_eq}}">Admin</a>
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Danh sách Người dùng</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped" id="dataTableUsers" width="100%" cellspacing="0">
+                <thead>
+                <tr>
+                    <th>Họ tên</th>
+                    <th>Email</th>
+                    <th>Vai trò</th>
+                    <th>Số điện thoại</th>
+                    <th>Trạng thái</th>
+                    <th>Ngày tham gia</th>
+                    <th>Hành động</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{#each users}}
+                    <tr>
+                        <td><strong>{{this.firstName}} {{this.lastName}}</strong></td>
+                        <td>{{this.email}}</td>
+                        <td>
+                            {{#if_eq this.role 'admin'}}
+                                <span class="badge badge-danger">Admin</span>
+                            {{/if_eq}}
+                            {{#if_eq this.role 'user'}}
+                                <span class="badge badge-info">User</span>
+                            {{/if_eq}}
+                        </td>
+                        <td>{{this.phone}}</td>
+                        <td>
+                            {{#if this.isActive}}
+                                <span class="badge badge-success">Actived</span>
+                            {{else}}
+                                <span class="badge badge-secondary">Locked</span>
+                            {{/if}}
+                        </td>
+                        <td>{{this.createdAt}}</td>
+                        <td style="white-space: nowrap;">
+                            <a href="/admin/users/edit/{{this._id}}" class="btn btn-sm btn-warning" title="Sửa"><i class="fa fa-edit"></i></a>
+                            <form action="/admin/users/delete/{{this._id}}" method="POST" style="display:inline;" onsubmit="return confirm('Bạn có chắc muốn xóa người dùng này?');">
+                                <button type="submit" class="btn btn-sm btn-danger" title="Xóa"><i class="fa fa-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                {{else}}
+                    <tr>
+                        <td colspan="7" class="text-center">Chưa có người dùng nào.</td>
+                    </tr>
+                {{/each}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

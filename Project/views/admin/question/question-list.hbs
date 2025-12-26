@@ -1,0 +1,63 @@
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Ngân hàng Câu hỏi</h1>
+     <a href="/admin/questions/add" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+        <i class="fa fa-plus fa-sm text-white-50"></i> Thêm Câu hỏi
+    </a>
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Danh sách Câu hỏi</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped" id="dataTableQuestions" width="100%" cellspacing="0">
+                <thead>
+                <tr>
+                    <th>Nội dung</th>
+                    <th>Loại</th>
+                    <th>Độ khó</th>
+                    <th>Đáp án đúng</th>
+                    <th>Hành động</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{#each questions}}
+                    <tr>
+                        <td>{{this.content}}</td>
+                        <td>
+                            {{#if_eq this.type 'multiple_choice'}}Trắc nghiệm{{/if_eq}}
+                            {{#if_eq this.type 'fill_in_blank'}}Điền từ{{/if_eq}}
+                            {{#if_eq this.type 'listening'}}Nghe{{/if_eq}}
+                        </td>
+                        <td>
+                             {{#if_eq this.level 'easy'}}<span class="badge badge-success">Dễ</span>{{/if_eq}}
+                             {{#if_eq this.level 'medium'}}<span class="badge badge-warning">TB</span>{{/if_eq}}
+                             {{#if_eq this.level 'hard'}}<span class="badge badge-danger">Khó</span>{{/if_eq}}
+                        </td>
+                        <td>
+                            <ul class="mb-0 pl-3">
+                            {{#each this.options}}
+                                {{#if this.isCorrect}}
+                                    <li class="text-success font-weight-bold">{{this.text}}</li>
+                                {{/if}}
+                            {{/each}}
+                            </ul>
+                        </td>
+                        <td>
+                            <a href="/admin/questions/edit/{{this._id}}" class="btn btn-sm btn-warning"><i class="fa fa-edit"></i></a>
+                            <form action="/admin/questions/delete/{{this._id}}" method="POST" style="display:inline;" onsubmit="return confirm('Xóa câu hỏi này?');">
+                                <button type="submit" class="btn btn-sm btn-danger"><i class="fa fa-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                {{else}}
+                    <tr>
+                        <td colspan="5" class="text-center">Chưa có câu hỏi nào.</td>
+                    </tr>
+                {{/each}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

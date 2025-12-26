@@ -1,0 +1,55 @@
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h1 class="text-center mb-4">{{title}}</h1>
+                    
+                    {{#if errors}}
+                        <div class="alert alert-danger">
+                            {{#each errors}}
+                                <p class="mb-0">{{this}}</p>
+                            {{/each}}
+                        </div>
+                    {{/if}}
+                    
+                    {{#if success_message}}
+                        <div class="alert alert-success">{{success_message}}</div>
+                    {{/if}}
+                    
+                    {{#if error_message}}
+                        <div class="alert alert-danger">{{error_message}}</div>
+                    {{/if}}
+                    
+                    <form action="/register" method="POST">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="firstName" class="form-label">First Name</label>
+                                <input type="text" name="firstName" id="firstName" class="form-control" value="{{firstName}}">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="lastName" class="form-label">Last Name</label>
+                                <input type="text" name="lastName" id="lastName" class="form-control" value="{{lastName}}">
+                            </div>
+                        </div>
+                    
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" name="email" id="email" class="form-control" value="{{email}}">
+                        </div>
+                    
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" name="password" id="password" class="form-control" value="{{password}}">
+                        </div>
+                    
+                        <button type="submit" class="btn btn-primary w-100 py-2">Register</button>
+                    </form>
+                     <div class="mt-3 text-center">
+                        <p>Already have an account? <a href="/login">Login here</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

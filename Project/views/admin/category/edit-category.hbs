@@ -1,0 +1,27 @@
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Sửa Danh mục</h1>
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-body">
+        <form action="/admin/category/edit/{{category._id}}" method="POST">
+            <div class="form-group">
+                <label for="name">Tên Danh mục</label>
+                <input type="text" class="form-control" id="name" name="name" value="{{category.name}}" required>
+            </div>
+            <div class="form-group">
+                <label for="description">Mô tả</label>
+                <textarea class="form-control" id="description" name="description" rows="3">{{category.description}}</textarea>
+            </div>
+            <div class="form-group">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="isActive" name="isActive" value="true" {{#if category.isActive}}checked{{/if}}>
+                    <label class="form-check-label" for="isActive">Hoạt động</label>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Cập nhật Danh mục</button>
+            <a href="/admin/category" class="btn btn-secondary">Hủy</a>
+        </form>
+    </div>
+</div>

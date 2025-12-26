@@ -1,0 +1,57 @@
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Sửa Bài học</h1>
+    <a href="/admin/lessons" class="btn btn-sm btn-secondary shadow-sm">
+        <i class="fas fa-arrow-left fa-sm text-white-50"></i> Quay lại
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mb-4">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Thông tin bài học</h6>
+            </div>
+            <div class="card-body">
+                <form action="/admin/lessons/edit/{{lesson._id}}" method="POST">
+                    <div class="form-group">
+                        <label for="course">Thuộc Khóa học</label>
+                        <select class="form-control" id="course" name="course" required>
+                             {{#each courses}}
+                                <option value="{{this._id}}" {{#if_eq this._id ../lesson.course}}selected{{/if_eq}}>{{this.title}}</option>
+                            {{/each}}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="title">Tiêu đề bài học</label>
+                        <input type="text" class="form-control" id="title" name="title" value="{{lesson.title}}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="videoUrl">Link Video</label>
+                        <input type="text" class="form-control" id="videoUrl" name="videoUrl" value="{{lesson.videoUrl}}">
+                    </div>
+                     <div class="form-group">
+                        <label for="content">Nội dung / Mô tả</label>
+                        <textarea class="form-control" id="content" name="content" rows="4">{{lesson.content}}</textarea>
+                    </div>
+                     <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="duration">Thời lượng (phút)</label>
+                            <input type="number" class="form-control" id="duration" name="duration" value="{{lesson.duration}}">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="position">Thứ tự hiển thị</label>
+                            <input type="number" class="form-control" id="position" name="position" value="{{lesson.position}}">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="isFree" name="isFree" value="true" {{#if lesson.isFree}}checked{{/if}}>
+                            <label class="custom-control-label" for="isFree">Cho phép học thử miễn phí</label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Lưu Thay Đổi</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -2,107 +2,74 @@
 <div class="container-xxl py-5 wow fadeInUp" data-wow-delay="0.1s">
     <div class="container">
         <div class="text-center">
-            <h6 class="section-title bg-white text-center text-primary px-3">Success Stories</h6>
-            <h1 class="mb-5">What Our Students Say!</h1>
-            <p class="mb-5">Read inspiring stories from our students who achieved their English goals with EnglishMaster</p>
+            <h6 class="section-title bg-white text-center text-primary px-3">Câu Chuyện Thành Công</h6>
+            <h1 class="mb-5">Học Viên Nói Gì Về Chúng Tôi!</h1>
+            <p class="mb-5">Khám phá những câu chuyện truyền cảm hứng từ học viên đã đạt được mục tiêu tiếng Anh cùng EnglishMaster</p>
         </div>
-        <div class="owl-carousel testimonial-carousel position-relative">
-            <!-- Testimonial 1 -->
-            <div class="testimonial-item text-center">
-                <img class="border rounded-circle p-2 mx-auto mb-3" src="img/testimonial-1.jpg" style="width: 80px; height: 80px;">
-                <h5 class="mb-0">Nguyen Van A</h5>
-                <p class="text-primary">TOEIC 850 Points</p>
-                <div class="testimonial-text bg-light text-center p-4">
-                    <div class="mb-3">
-                        <i class="fa fa-star text-warning"></i>
-                        <i class="fa fa-star text-warning"></i>
-                        <i class="fa fa-star text-warning"></i>
-                        <i class="fa fa-star text-warning"></i>
-                        <i class="fa fa-star text-warning"></i>
+        <div class="row g-4 justify-content-center">
+            {{#each reviews}}
+            <div class="col-lg-4 col-md-6">
+                <div class="testimonial-item text-center bg-light p-4 h-100">
+                    <img class="border rounded-circle p-2 mx-auto mb-3" src="https://ui-avatars.com/api/?name={{this.user.firstName}}+{{this.user.lastName}}&background=random" style="width: 80px; height: 80px;">
+                    <h5 class="mb-0">{{this.user.firstName}} {{this.user.lastName}}</h5>
+                    <div class="mb-3 text-primary">
+                        <i class="fa fa-star"></i>
+                        <i class="fa fa-star"></i>
+                        <i class="fa fa-star"></i>
+                        <i class="fa fa-star"></i>
+                        <i class="fa fa-star"></i>
                     </div>
-                    <p class="mb-0">"I improved from 600 to 850 in just 3 months! The TOEIC course was perfectly structured and the practice tests were incredibly helpful for the real exam."</p>
+                    <p class="mb-0">"{{this.comment}}"</p>
                 </div>
             </div>
-
-            <!-- Testimonial 2 -->
-            <div class="testimonial-item text-center">
-                <img class="border rounded-circle p-2 mx-auto mb-3" src="img/testimonial-2.jpg" style="width: 80px; height: 80px;">
-                <h5 class="mb-0">Tran Thi B</h5>
-                <p class="text-primary">IELTS 7.5 Band</p>
-                <div class="testimonial-text bg-light text-center p-4">
-                    <div class="mb-3">
-                        <i class="fa fa-star text-warning"></i>
-                        <i class="fa fa-star text-warning"></i>
-                        <i class="fa fa-star text-warning"></i>
-                        <i class="fa fa-star text-warning"></i>
-                        <i class="fa fa-star text-warning"></i>
-                    </div>
-                    <p class="mb-0">"Excellent IELTS preparation! The speaking practice with native teachers made all the difference. I got into my dream university in Australia!"</p>
-                </div>
+            {{else}}
+            <div class="col-12 text-center">
+                <p class="text-muted">Hiện chưa có đánh giá nào. Hãy là người đầu tiên!</p>
             </div>
-
-            <!-- Testimonial 3 -->
-            <div class="testimonial-item text-center">
-                <img class="border rounded-circle p-2 mx-auto mb-3" src="img/testimonial-3.jpg" style="width: 80px; height: 80px;">
-                <h5 class="mb-0">Le Van C</h5>
-                <p class="text-primary">TOEFL 105 Points</p>
-                <div class="testimonial-text bg-light text-center p-4">
-                    <div class="mb-3">
-                        <i class="fa fa-star text-warning"></i>
-                        <i class="fa fa-star text-warning"></i>
-                        <i class="fa fa-star text-warning"></i>
-                        <i class="fa fa-star text-warning"></i>
-                        <i class="fa fa-star text-warning"></i>
-                    </div>
-                    <p class="mb-0">"Thanks to EnglishMaster, I achieved 105 in TOEFL and got accepted into a top US university. The writing feedback was particularly valuable."</p>
-                </div>
-            </div>
-
-            <!-- Testimonial 4 -->
-            <div class="testimonial-item text-center">
-                <img class="border rounded-circle p-2 mx-auto mb-3" src="img/testimonial-4.jpg" style="width: 80px; height: 80px;">
-                <h5 class="mb-0">Pham Thi D</h5>
-                <p class="text-primary">Business English</p>
-                <div class="testimonial-text bg-light text-center p-4">
-                    <div class="mb-3">
-                        <i class="fa fa-star text-warning"></i>
-                        <i class="fa fa-star text-warning"></i>
-                        <i class="fa fa-star text-warning"></i>
-                        <i class="fa fa-star text-warning"></i>
-                        <i class="fa fa-star text-warning"></i>
-                    </div>
-                    <p class="mb-0">"The Business English course helped me communicate confidently with international clients. I got promoted to International Sales Manager!"</p>
-                </div>
-            </div>
+            {{/each}}
         </div>
 
-        <!-- Stats Section -->
-        <div class="row mt-5">
-            <div class="col-lg-3 col-6 text-center">
-                <h2 class="text-primary mb-1" data-toggle="counter-up">1500</h2>
-                <h6 class="text-uppercase">Students Taught</h6>
-            </div>
-            <div class="col-lg-3 col-6 text-center">
-                <h2 class="text-primary mb-1" data-toggle="counter-up">98</h2>
-                <h6 class="text-uppercase">Success Rate %</h6>
-            </div>
-            <div class="col-lg-3 col-6 text-center">
-                <h2 class="text-primary mb-1" data-toggle="counter-up">120</h2>
-                <h6 class="text-uppercase">TOEIC 800+</h6>
-            </div>
-            <div class="col-lg-3 col-6 text-center">
-                <h2 class="text-primary mb-1" data-toggle="counter-up">85</h2>
-                <h6 class="text-uppercase">IELTS 7.0+</h6>
-            </div>
-        </div>
-
-        <!-- CTA Section -->
-        <div class="text-center mt-5">
-            <div class="bg-light p-5 rounded">
-                <h3 class="mb-4">Ready to Start Your Success Story?</h3>
-                <p class="mb-4">Join our successful students and achieve your English goals with our proven methods.</p>
-                <a class="btn btn-primary py-3 px-5" href="/courses">View Courses</a>
-                <a class="btn btn-outline-primary py-3 px-5 ms-2" href="/contact">Free Consultation</a>
+        <!-- Add Website Review Form -->
+        <div class="row justify-content-center mt-5">
+            <div class="col-lg-8">
+                <div class="bg-light p-5 rounded shadow-sm text-center">
+                    <h3 class="mb-4">Chia sẻ cảm nhận của bạn</h3>
+                    <p class="mb-4">Góp ý của bạn giúp EnglishMaster ngày càng hoàn thiện hơn!</p>
+                    
+                    {{#if isLoggedIn}}
+                    <form action="/reviews" method="POST" class="text-start">
+                        <input type="hidden" name="type" value="website">
+                        <div class="row g-3">
+                            <div class="col-12 text-center">
+                                <label class="form-label d-block text-muted">Xếp hạng website</label>
+                                <div class="btn-group" role="group">
+                                    <input type="radio" class="btn-check" name="rating" id="rate5" value="5" checked>
+                                    <label class="btn btn-outline-primary" for="rate5">5 ★</label>
+                                    <input type="radio" class="btn-check" name="rating" id="rate4" value="4">
+                                    <label class="btn btn-outline-primary" for="rate4">4 ★</label>
+                                    <input type="radio" class="btn-check" name="rating" id="rate3" value="3">
+                                    <label class="btn btn-outline-primary" for="rate3">3 ★</label>
+                                    <input type="radio" class="btn-check" name="rating" id="rate2" value="2">
+                                    <label class="btn btn-outline-primary" for="rate2">2 ★</label>
+                                    <input type="radio" class="btn-check" name="rating" id="rate1" value="1">
+                                    <label class="btn btn-outline-primary" for="rate1">1 ★</label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <textarea class="form-control border-0 shadow-sm" name="comment" rows="4" placeholder="Lời nhắn hoặc góp ý của bạn..." required></textarea>
+                            </div>
+                            <div class="col-12">
+                                <button class="btn btn-primary w-100 py-3" type="submit">Gửi Đánh Giá Ngay</button>
+                            </div>
+                        </div>
+                    </form>
+                    {{else}}
+                    <div class="p-3">
+                        <p class="mb-4">Vui lòng đăng nhập để gửi góp ý và đánh giá cho trung tâm.</p>
+                        <a href="/login" class="btn btn-primary px-5 py-3">Đăng nhập ngay</a>
+                    </div>
+                    {{/if}}
+                </div>
             </div>
         </div>
     </div>

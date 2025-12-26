@@ -1,0 +1,91 @@
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Sửa Khóa học</h1>
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-body">
+        <form action="/admin/product/edit/{{product._id}}" method="POST">
+            <div class="form-group">
+                <label for="title">Tên Khóa học</label>
+                <input type="text" class="form-control" id="title" name="title" value="{{product.title}}" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="category">Danh mục</label>
+                <select class="form-control" id="category" name="category" required>
+                    <option value="">Chọn danh mục...</option>
+                    {{#each categories}}
+                        <option value="{{this._id}}">{{this.name}}</option>
+                    {{/each}}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="price">Giá (VNĐ)</label>
+                <input type="number" class="form-control" id="price" name="price" value="{{product.price}}" required min="0">
+            </div>
+
+            <div class="form-group">
+                <label for="originalPrice">Giá gốc (VNĐ)</label>
+                <input type="number" class="form-control" id="originalPrice" name="originalPrice" value="{{product.originalPrice}}" min="0">
+            </div>
+
+            <div class="form-group">
+                <label for="duration">Thời lượng (phút)</label>
+                <input type="number" class="form-control" id="duration" name="duration" value="{{product.duration}}" min="0">
+            </div>
+
+            <div class="form-group">
+                <label for="thumbnail">Link Ảnh bìa</label>
+                <input type="text" class="form-control" id="thumbnail" name="thumbnail" value="{{product.thumbnail}}" placeholder="/img/default.jpg">
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="level">Trình độ</label>
+                        <select name="level" id="level" class="form-control">
+                            <option value="beginner">Cơ bản (Beginner)</option>
+                            <option value="intermediate">Trung cấp (Intermediate)</option>
+                            <option value="advanced">Nâng cao (Advanced)</option>
+                            <option value="all">Tất cả (All levels)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="teachingMethod">Hình thức học</label>
+                        <select name="teachingMethod" id="teachingMethod" class="form-control">
+                            <option value="online">Học Online</option>
+                            <option value="offline">Học Offline</option>
+                            <option value="hybrid">Kết hợp (Hybrid)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+             <div class="form-group">
+                <label for="description">Mô tả</label>
+                <textarea class="form-control" id="description" name="description" rows="5" required>{{product.description}}</textarea>
+            </div>
+
+            <div class="form-group">
+                <div class="custom-control custom-checkbox small">
+                    <input type="checkbox" class="custom-control-input" id="isActive" name="isActive" value="true" {{#if product.isActive}}checked{{/if}}>
+                    <label class="custom-control-label" for="isActive">Hoạt động</label>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Cập nhật Khóa học</button>
+            <a href="/admin/product" class="btn btn-secondary">Hủy</a>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Set selected values
+    document.getElementById('category').value = "{{product.category}}";
+    document.getElementById('level').value = "{{product.level}}";
+    document.getElementById('teachingMethod').value = "{{product.teachingMethod}}";
+</script>

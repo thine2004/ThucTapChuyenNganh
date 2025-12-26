@@ -1,0 +1,52 @@
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Sửa Tài nguyên</h1>
+    <a href="/admin/resources" class="btn btn-sm btn-secondary shadow-sm">
+        <i class="fas fa-arrow-left fa-sm text-white-50"></i> Quay lại
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-lg-10 mb-4">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Nội dung tài nguyên: {{resource.title}}</h6>
+            </div>
+            <div class="card-body">
+                <form action="/admin/resources/edit/{{resource._id}}" method="POST">
+                    <div class="form-group">
+                        <label for="title">Tiêu đề <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="title" name="title" required value="{{resource.title}}">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="type">Loại tài nguyên</label>
+                            <select class="form-control" id="type" name="type">
+                                <option value="grammar" {{#if_eq resource.type 'grammar'}}selected{{/if_eq}}>Ngữ pháp (Grammar)</option>
+                                <option value="vocabulary" {{#if_eq resource.type 'vocabulary'}}selected{{/if_eq}}>Từ vựng (Vocabulary)</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="thumbnail">Thumbnail URL</label>
+                            <input type="text" class="form-control" id="thumbnail" name="thumbnail" value="{{resource.thumbnail}}">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="content">Nội dung chi tiết (HTML/Markdown) <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="content" name="content" rows="15" required>{{resource.content}}</textarea>
+                    </div>
+
+                    <div class="form-group">
+                         <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="isActive" name="isActive" value="true" {{#if resource.isActive}}checked{{/if}}>
+                            <label class="custom-control-label" for="isActive">Hiển thị công khai</label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-warning btn-block py-2">Cập nhật Tài nguyên</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

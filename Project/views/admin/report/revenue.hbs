@@ -1,0 +1,79 @@
+<div class="row">
+    <div class="col-xl-3 col-sm-6 mb-3">
+        <div class="card text-white bg-primary o-hidden h-100">
+            <div class="card-body">
+                <div class="card-body-icon">
+                    <i class="fa fa-fw fa-money"></i>
+                </div>
+                <div class="mr-5">Tổng doanh thu ({{year}})</div>
+                <h3 class="mt-2">{{totalRevenue}}₫</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-header">
+        <i class="fa fa-area-chart"></i> Biểu đồ doanh thu theo tháng năm {{year}}
+    </div>
+    <div class="card-body">
+        <canvas id="revenueChart" width="100%" height="30"></canvas>
+    </div>
+    <div class="card-footer small text-muted">Dữ liệu được cập nhật dựa trên các đơn hàng đã hoàn thành.</div>
+</div>
+
+<script src="/vendor/chart.js/Chart.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var ctx = document.getElementById("revenueChart");
+        var monthlyData = {{{monthlyRevenue}}};
+        
+        var myLineChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ["Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"],
+                datasets: [{
+                    label: "Doanh thu (₫)",
+                    lineTension: 0.3,
+                    backgroundColor: "rgba(2,117,216,0.2)",
+                    borderColor: "rgba(2,117,216,1)",
+                    pointRadius: 5,
+                    pointBackgroundColor: "rgba(2,117,216,1)",
+                    pointBorderColor: "rgba(255,255,255,0.8)",
+                    pointHoverRadius: 5,
+                    pointHoverBackgroundColor: "rgba(2,117,216,1)",
+                    pointHitRadius: 20,
+                    pointBorderWidth: 2,
+                    data: monthlyData,
+                }],
+            },
+            options: {
+                scales: {
+                    xAxes: [{
+                        time: {
+                            unit: 'date'
+                        },
+                        gridLines: {
+                            display: false
+                        },
+                        ticks: {
+                            maxTicksLimit: 7
+                        }
+                    }],
+                    yAxes: [{
+                        ticks: {
+                            min: 0,
+                            maxTicksLimit: 5
+                        },
+                        gridLines: {
+                            color: "rgba(0, 0, 0, .125)",
+                        }
+                    }],
+                },
+                legend: {
+                    display: false
+                }
+            }
+        });
+    });
+</script>

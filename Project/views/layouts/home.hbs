@@ -1,115 +1,86 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="vi">
 <head>
     <meta charset="utf-8">
-    <title>EnglishMaster - Luyện Thi Tiếng Anh</title>
+    <title>EnglishMaster - Trung tâm Luyện thi Tiếng Anh TOEIC, IELTS, TOEFL</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <meta content="luyện thi tiếng anh, toeic, ielts, toefl, english test" name="keywords">
-    <meta content="Trung tâm luyện thi tiếng Anh chất lượng cao - Cam kết đầu ra TOEIC, IELTS, TOEFL" name="description">
+    <meta content="luyện thi tiếng anh, toeic, ielts, toefl, english test, khóa học tiếng anh" name="keywords">
+    <meta content="EnglishMaster - Trung tâm luyện thi tiếng Anh chất lượng cao với đội ngũ giáo viên bản ngữ. Cam kết đầu ra TOEIC 750+, IELTS 6.5+, TOEFL 90+" name="description">
 
-    <!-- Favicon -->
-    <link href="img/favicon.ico" rel="icon">
+    <link href="/img/favicon.ico" rel="icon">
 
-    <!-- Google Web Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
 
-    <!-- Icon Font Stylesheet -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
 
-    <!-- Libraries Stylesheet -->
-    <link href="lib/animate/animate.min.css" rel="stylesheet">
-    <link href="lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
+    <link href="/lib/animate/animate.min.css" rel="stylesheet">
+    <link href="/lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
 
-    <!-- Customized Bootstrap Stylesheet -->
-    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- Template Stylesheet -->
-    <link href="css/style.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+    <style>
+        /* Loại bỏ CSS message-banner không cần thiết */
+        .toast-container {
+            z-index: 1080; /* Đặt cao hơn modal (1060) */
+        }
+    </style>
 </head>
-
 <body>
-<!-- Spinner Start -->
 <div id="spinner" class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
     <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
         <span class="sr-only">Loading...</span>
     </div>
 </div>
-<!-- Spinner End -->
+{{> navbar}}
 
-
-<!-- Navbar Start -->
-<nav class="navbar navbar-expand-lg bg-white navbar-light shadow sticky-top p-0">
-    <a href="/" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
-        <h2 class="m-0 text-primary"><i class="fa fa-language me-3"></i>EnglishMaster</h2>
-    </a>
-    <button type="button" class="navbar-toggler me-4" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarCollapse">
-        <div class="navbar-nav ms-auto p-4 p-lg-0">
-            <a href="/" class="nav-item nav-link active">Home</a>
-            <a href="/about" class="nav-item nav-link">About</a>
-            <a href="/courses" class="nav-item nav-link">Courses</a>
-            <a href="/team" class="nav-item nav-link">Team</a>
-            <div class="nav-item dropdown">
-                <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Exam Preparation</a>
-                <div class="dropdown-menu fade-down m-0">
-                    <a href="/toeic" class="dropdown-item">TOEIC</a>
-                    <a href="/ielts" class="dropdown-item">IELTS</a>
-                    <a href="/toefl" class="dropdown-item">TOEFL</a>
-                    <a href="/practice" class="dropdown-item">Practice Tests</a>
+<!-- TOAST CONTAINER - VỊ TRÍ GÓC DƯỚI BÊN PHẢI -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    {{#if message}}
+        <div id="liveToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    {{message}} {{#if user}}<strong>{{user}}</strong>{{/if}}
                 </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
-            <div class="nav-item dropdown">
-                <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Resources</a>
-                <div class="dropdown-menu fade-down m-0">
-                    <a href="/grammar" class="dropdown-item">Grammar</a>
-                    <a href="/vocabulary" class="dropdown-item">Vocabulary</a>
-                    <a href="/testimonial" class="dropdown-item">Testimonials</a>
-                </div>
-            </div>
-            <a href="/contact" class="nav-item nav-link">Contact</a>
         </div>
-        <a href="/register" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block">Join Now<i class="fa fa-arrow-right ms-3"></i></a>
-    </div>
-</nav>
-<!-- Navbar End -->
+    {{/if}}
+</div>
+<!-- KẾT THÚC TOAST CONTAINER -->
 
-
-<!-- Carousel Start -->
 <div class="container-fluid p-0 mb-5">
     <div class="owl-carousel header-carousel position-relative">
         <div class="owl-carousel-item position-relative">
-            <img class="img-fluid" src="img/carousel-1.jpg" alt="">
+            <img class="img-fluid" src="/img/carousel-1.jpg" alt="Luyện thi tiếng Anh cùng EnglishMaster">
             <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center" style="background: rgba(24, 29, 56, .7);">
                 <div class="container">
                     <div class="row justify-content-start">
                         <div class="col-sm-10 col-lg-8">
-                            <h5 class="text-primary text-uppercase mb-3 animated slideInDown">Best English Courses</h5>
-                            <h1 class="display-3 text-white animated slideInDown">Master English with Expert Teachers</h1>
-                            <p class="fs-5 text-white mb-4 pb-2">Achieve your desired scores in TOEIC, IELTS, and TOEFL with our proven teaching methods and experienced native teachers.</p>
-                            <a href="" class="btn btn-primary py-md-3 px-md-5 me-3 animated slideInLeft">Read More</a>
-                            <a href="" class="btn btn-light py-md-3 px-md-5 animated slideInRight">Join Now</a>
+                            <h5 class="text-primary text-uppercase mb-3 animated slideInDown">Khóa học tiếng Anh chất lượng</h5>
+                            <h1 class="display-3 text-white animated slideInDown">Luyện thi tiếng Anh cùng chuyên gia</h1>
+                            <p class="fs-5 text-white mb-4 pb-2">Đạt điểm số mong muốn trong TOEIC, IELTS và TOEFL với phương pháp giảng dạy đã được chứng minh và đội ngũ giáo viên bản ngữ giàu kinh nghiệm.</p>
+                            <a href="/courses" class="btn btn-primary py-md-3 px-md-5 me-3 animated slideInLeft">Xem khóa học</a>
+                            <a href="/courses" class="btn btn-light py-md-3 px-md-5 animated slideInRight">Mua ngay</a>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="owl-carousel-item position-relative">
-            <img class="img-fluid" src="img/carousel-2.jpg" alt="">
+            <img class="img-fluid" src="/img/carousel-2.jpg" alt="Cam kết đầu ra TOEIC, IELTS, TOEFL">
             <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center" style="background: rgba(24, 29, 56, .7);">
                 <div class="container">
                     <div class="row justify-content-start">
                         <div class="col-sm-10 col-lg-8">
-                            <h5 class="text-primary text-uppercase mb-3 animated slideInDown">Exam Preparation</h5>
-                            <h1 class="display-3 text-white animated slideInDown">Get Your Target Score Guaranteed</h1>
-                            <p class="fs-5 text-white mb-4 pb-2">Our comprehensive courses ensure you reach your target scores in TOEIC 800+, IELTS 7.0+, and TOEFL 100+ with confidence.</p>
-                            <a href="" class="btn btn-primary py-md-3 px-md-5 me-3 animated slideInLeft">Read More</a>
-                            <a href="" class="btn btn-light py-md-3 px-md-5 animated slideInRight">Join Now</a>
+                            <h5 class="text-primary text-uppercase mb-3 animated slideInDown">Cam kết đầu ra</h5>
+                            <h1 class="display-3 text-white animated slideInDown">Học lại miễn phí nếu không đạt</h1>
+                            <p class="fs-5 text-white mb-4 pb-2">Chúng tôi tự tin cam kết đầu ra TOEIC 750+, IELTS 6.5+, TOEFL 90+. Học lại hoàn toàn miễn phí nếu không đạt mục tiêu.</p>
+                            <a href="/courses" class="btn btn-primary py-md-3 px-md-5 me-3 animated slideInLeft">Xem khóa học</a>
+                            <a href="/contact" class="btn btn-light py-md-3 px-md-5 animated slideInRight">Tư vấn miễn phí</a>
                         </div>
                     </div>
                 </div>
@@ -117,65 +88,43 @@
         </div>
     </div>
 </div>
-<!-- Carousel End -->
+<main>
+    {{{body}}}
+</main>
 
-
-{{{body}}}
-
-
-<!-- Footer Start -->
 <div class="container-fluid bg-dark text-light footer pt-5 mt-5 wow fadeIn" data-wow-delay="0.1s">
     <div class="container py-5">
         <div class="row g-5">
             <div class="col-lg-3 col-md-6">
-                <h4 class="text-white mb-3">Quick Link</h4>
-                <a class="btn btn-link" href="">About Us</a>
-                <a class="btn btn-link" href="">Contact Us</a>
-                <a class="btn btn-link" href="">Privacy Policy</a>
-                <a class="btn btn-link" href="">Terms & Condition</a>
-                <a class="btn btn-link" href="">FAQs & Help</a>
+                <h4 class="text-white mb-3">Liên kết nhanh</h4>
+                <a class="btn btn-link" href="/">Trang chủ</a>
+                <a class="btn btn-link" href="/about">Giới thiệu</a>
+                <a class="btn btn-link" href="/courses">Khóa học</a>
+                <a class="btn btn-link" href="/contact">Liên hệ</a>
             </div>
             <div class="col-lg-3 col-md-6">
-                <h4 class="text-white mb-3">Contact</h4>
-                <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>123 Street, New York, USA</p>
-                <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+012 345 67890</p>
-                <p class="mb-2"><i class="fa fa-envelope me-3"></i>info@englishmaster.com</p>
+                <h4 class="text-white mb-3">Thông tin</h4>
+                <a class="btn btn-link" href="/about">Về chúng tôi</a>
+                <a class="btn btn-link" href="/team">Giảng viên</a>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <h4 class="text-white mb-3">Liên hệ</h4>
+                <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>123 Đường ABC, Quận 1, TP.HCM</p>
+                <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+84 28 1234 5678</p>
+                <p class="mb-2"><i class="fa fa-envelope me-3"></i>info@englishmaster.edu.vn</p>
                 <div class="d-flex pt-2">
-                    <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-twitter"></i></a>
                     <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-facebook-f"></i></a>
                     <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-youtube"></i></a>
                     <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-linkedin-in"></i></a>
+                    <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-tiktok"></i></a>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6">
-                <h4 class="text-white mb-3">Certifications</h4>
-                <div class="row g-2 pt-2">
-                    <div class="col-4">
-                        <img class="img-fluid bg-light p-1" src="img/course-1.jpg" alt="">
-                    </div>
-                    <div class="col-4">
-                        <img class="img-fluid bg-light p-1" src="img/course-2.jpg" alt="">
-                    </div>
-                    <div class="col-4">
-                        <img class="img-fluid bg-light p-1" src="img/course-3.jpg" alt="">
-                    </div>
-                    <div class="col-4">
-                        <img class="img-fluid bg-light p-1" src="img/course-2.jpg" alt="">
-                    </div>
-                    <div class="col-4">
-                        <img class="img-fluid bg-light p-1" src="img/course-3.jpg" alt="">
-                    </div>
-                    <div class="col-4">
-                        <img class="img-fluid bg-light p-1" src="img/course-1.jpg" alt="">
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <h4 class="text-white mb-3">Newsletter</h4>
-                <p>Subscribe to get updates on new courses and learning materials.</p>
+                <h4 class="text-white mb-3">Đăng ký nhận tin</h4>
+                <p>Nhận thông tin về khóa học mới, tài liệu miễn phí và tips học tiếng Anh hiệu quả.</p>
                 <div class="position-relative mx-auto" style="max-width: 400px;">
-                    <input class="form-control border-0 w-100 py-3 ps-4 pe-5" type="text" placeholder="Your email">
-                    <button type="button" class="btn btn-primary py-2 position-absolute top-0 end-0 mt-2 me-2">SignUp</button>
+                    <input class="form-control border-0 w-100 py-3 ps-4 pe-5" type="text" placeholder="Email của bạn">
+                    <button type="button" class="btn btn-primary py-2 position-absolute top-0 end-0 mt-2 me-2">Đăng ký</button>
                 </div>
             </div>
         </div>
@@ -185,40 +134,44 @@
             <div class="row">
                 <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
                     &copy; <a class="border-bottom" href="#">EnglishMaster</a>, All Right Reserved.
-
-                    <!--/*** This template is free as long as you keep the footer author's credit link/attribution link/backlink. If you'd like to use the template without the footer author's credit link/attribution link/backlink, you can purchase the Credit Removal License from "https://htmlcodex.com/credit-removal". Thank you for your support. ***/-->
-                    Designed By <a class="border-bottom" href="https://htmlcodex.com">HTML Codex</a><br><br>
-                    Distributed By <a class="border-bottom" href="https://themewagon.com">ThemeWagon</a>
                 </div>
                 <div class="col-md-6 text-center text-md-end">
                     <div class="footer-menu">
-                        <a href="">Home</a>
-                        <a href="">Cookies</a>
-                        <a href="">Help</a>
-                        <a href="">FQAs</a>
+                        <a href="/">Trang chủ</a>
+                        <a href="/privacy">Chính sách bảo mật</a>
+                        <a href="/terms">Điều khoản sử dụng</a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-<!-- Footer End -->
-
-
-<!-- Back to Top -->
 <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
 
-
-<!-- JavaScript Libraries -->
 <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="lib/wow/wow.min.js"></script>
-<script src="lib/easing/easing.min.js"></script>
-<script src="lib/waypoints/waypoints.min.js"></script>
-<script src="lib/owlcarousel/owl.carousel.min.js"></script>
+<script src="/lib/wow/wow.min.js"></script>
+<script src="/lib/easing/easing.min.js"></script>
+<script src="/lib/waypoints/waypoints.min.js"></script>
+<script src="/lib/owlcarousel/owl.carousel.min.js"></script>
 
-<!-- Template Javascript -->
-<script src="js/main.js"></script>
+<script src="/js/main.js"></script>
+
+<!-- JAVASCRIPT ĐỂ KHỞI TẠO VÀ HIỂN THỊ TOAST -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const toastEl = document.getElementById('liveToast');
+        // Kiểm tra nếu phần tử toast và thông báo (message) tồn tại
+        if (toastEl) {
+            // Khởi tạo đối tượng Toast của Bootstrap
+            const toast = new bootstrap.Toast(toastEl, {
+                autohide: true,
+                delay: 5000 // Tự động ẩn sau 5 giây
+            });
+            // Hiển thị toast
+            toast.show();
+        }
+    });
+</script>
 </body>
-
 </html>

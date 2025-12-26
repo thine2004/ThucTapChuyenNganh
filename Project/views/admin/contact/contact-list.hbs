@@ -1,0 +1,114 @@
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Quản lý Liên hệ</h1>
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Danh sách Tin nhắn Liên hệ</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped" id="dataTableContacts" width="100%" cellspacing="0">
+                <thead>
+                <tr>
+                    <th>Họ tên</th>
+                    <th>Email / SĐT</th>
+                    <th>Nội dung</th>
+                    <th>Khóa học QT</th>
+                    <th>Ngày gửi</th>
+                    <th>Tư vấn?</th>
+                    <th>Trạng thái</th>
+                    <th>Hành động</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{#each contacts}}
+                    <tr>
+                        <td>{{this.name}}</td>
+                        <td>
+                            {{this.email}}<br>
+                            <small>{{this.phone}}</small>
+                        </td>
+                        <td>{{this.message}}</td>
+                        <td>{{this.course}} <br> <small>{{this.level}}</small></td>
+                        <td>{{formatDate this.createdAt}}</td>
+                        <td>
+                            {{#if this.isConsultationRequested}}
+                                <span class="badge badge-warning">Cần tư vấn</span>
+                            {{/if}}
+                        </td>
+                        <td>
+                            {{#if_eq this.status 'new'}}
+                                <span class="badge badge-danger">Mới</span>
+                            {{/if_eq}}
+                            {{#if_eq this.status 'read'}}
+                                <span class="badge badge-info">Đã xem</span>
+                            {{/if_eq}}
+                            {{#if_eq this.status 'contacted'}}
+                                <span class="badge badge-success">Đã liên hệ</span>
+                            {{/if_eq}}
+                            
+                            {{#if this.adminNotes}}
+                                <i class="fa fa-comment text-primary ml-1" title="{{this.adminNotes}}"></i>
+                            {{/if}}
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-info" data-toggle="modal" data-target="#replyModal{{this._id}}" title="Phản hồi/Cập nhật">
+                                <i class="fa fa-reply"></i>
+                            </button>
+                            <form action="/admin/contacts/delete/{{this._id}}" method="POST" style="display: inline;" onsubmit="return confirm('Xóa liên hệ này?');">
+                                <button type="submit" class="btn btn-sm btn-danger" title="Xóa">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+
+                    <!-- Reply Modal -->
+                    <div class="modal fade" id="replyModal{{this._id}}" tabindex="-1" role="dialog" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <form action="/admin/contacts/update/{{this._id}}" method="POST">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Phản hồi liên hệ: {{this.name}}</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="form-group">
+                                            <label>Nội dung khách gửi:</label>
+                                            <p class="bg-light p-2 border rounded small">{{this.message}}</p>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="status">Cập nhật trạng thái:</label>
+                                            <select name="status" id="status" class="form-control">
+                                                <option value="new" {{#if_eq this.status 'new'}}selected{{/if_eq}}>Mới (Chưa xem)</option>
+                                                <option value="read" {{#if_eq this.status 'read'}}selected{{/if_eq}}>Đã xem</option>
+                                                <option value="contacted" {{#if_eq this.status 'contacted'}}selected{{/if_eq}}>Đã liên hệ/Phản hồi</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="adminNotes">Ghi chú của Admin / Nội dung phản hồi:</label>
+                                            <textarea name="adminNotes" id="adminNotes" class="form-control" rows="4">{{this.adminNotes}}</textarea>
+                                            <small class="text-muted">Ghi chú riêng của admin hoặc nội dung bạn đã phản hồi qua Email/SĐT cho khách.</small>
+                                        </div>
+                                    </div>
+                                    <div class="modal-header">
+                                        <button type="submit" class="btn btn-primary">Lưu cập nhật</button>
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {{else}}
+                    <tr>
+                        <td colspan="8" class="text-center">Chưa có liên hệ nào.</td>
+                    </tr>
+                {{/each}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
