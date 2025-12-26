@@ -21,86 +21,75 @@ router.all('/*', function(req, res, next) {
 
 
 
+const passport = require('passport'); // Add require if not present, but usually in app.js is enough if configured there. 
+// Wait, router uses passport.authenticate middleware, so we probably need to require passport here too to use 'passport.authenticate' function.
+// Actually, passport instance is required.
+
 router.post('/login', (req, res, next) => {
-    if (!req.body.email || !req.body.password) {
-        req.flash('error_message', 'Vui lòng nhập email và mật khẩu');
-        return res.redirect('/login');
-    }
-    User.findOne({email: req.body.email}).then((user) => {
-        if (!user) {
-            req.flash('error_message', 'No user found with that email.');
-            return res.redirect('/login');
-        }
-        bcryptjs.compare(req.body.password, user.password, (err, isMatch) => {
-            if (err) throw err;
-            if (isMatch) {
-                // Password match
-                req.session.isAuthenticated = true;
-                req.session.userId = user._id;
-                req.session.userName = user.firstName + ' ' + user.lastName; // Combine names
-                req.session.userRole = user.role;
-                
-                req.flash('success_message', 'You are now logged in');
-                
-                if (user.role === 'admin') {
-                    res.redirect('/admin');
-                } else {
-                    res.redirect('/');
-                }
-            } else {
-                req.flash('error_message', 'Password incorrect');
-                res.redirect('/login');
-            }
-        });
-    });
+    passport.authenticate('local', {
+        successRedirect: '/login/success-handler', // Redirect to intermediate handler or check role
+        failureRedirect: '/login',
+        failureFlash: true,
+        successFlash: 'Đăng nhập thành công!'
+    })(req, res, next);
 });
 
+// Intermediate handler to check role after passport success
+router.get('/login/success-handler', (req, res) => {
+    if (req.user.role === 'admin') {
+        res.redirect('/admin');
+    } else {
+        const returnTo = req.session.returnTo || '/';
+        delete req.session.returnTo;
+        res.redirect(returnTo);
+    }
+});
 
-router.post('/register', (req, res, next) => {
+router.post('/register', async (req, res, next) => {
     let errors = [];
-    if (!req.body.firstName) {
-        errors.push('Vui lòng nhập Tên (First Name)');
-    }
-    if (!req.body.lastName) { 
-        errors.push('Vui lòng nhập Họ (Last Name)');
-    }
-    if (!req.body.email) {
-        errors.push('Vui lòng nhập Email');
-    }
-    if (!req.body.password) {
-        errors.push('Vui lòng nhập Mật khẩu');
-    }
+    const { firstName, lastName, email, password } = req.body;
+
+    if (!firstName) errors.push('Vui lòng nhập Tên (First Name)');
+    if (!lastName) errors.push('Vui lòng nhập Họ (Last Name)');
+    if (!email) errors.push('Vui lòng nhập Email');
+    if (!password) errors.push('Vui lòng nhập Mật khẩu');
 
     if (errors.length > 0) {
         errors.forEach(error => req.flash('registerErrors', error));
         req.flash('registerData', req.body);
         return res.redirect('/register');
-    } else {
-        User.findOne({email: req.body.email}).then((user) => {
-            if (!user) {
-                const newUser = new User({
-                    email: req.body.email,
-                    password: req.body.password,
-                    firstName: req.body.firstName,
-                    firstName: req.body.firstName,
-                    lastName: req.body.lastName,
-                    role: 'user'
-                });
-                bcryptjs.genSalt(10, function (err, salt) {
-                    bcryptjs.hash(newUser.password, salt, (err, hash) => {
-                        newUser.password = hash;
-                        newUser.save().then(saveUser => {
-                            req.flash('success_message', 'Successfully registered!');
-                            res.redirect('/login');
-                        });
-                    })
-                })
-            } else {
-                req.flash('error_message', 'Email is exist!');
-                req.flash('registerData', req.body);
-                res.redirect('/register');
-            }
+    }
+
+    try {
+        const user = await User.findOne({ email: email });
+        if (user) {
+            req.flash('error_message', 'Email đã tồn tại!');
+            req.flash('registerData', req.body);
+            return res.redirect('/register');
+        }
+
+        const newUser = new User({
+            email,
+            password,
+            firstName,
+            lastName,
+            role: 'user'
         });
+
+        // ⚡ TỐI ƯU: Sử dụng async/await và Giảm Salt Rounds xuống 8 để tăng tốc độ phản hồi
+        // (Vẫn đảm bảo an toàn cơ bản cho đồ án)
+        const salt = await bcryptjs.genSalt(8);
+        newUser.password = await bcryptjs.hash(newUser.password, salt);
+        
+        await newUser.save();
+        
+        req.flash('success_message', 'Đăng ký thành công! Vui lòng đăng nhập.');
+        res.redirect('/login');
+
+    } catch (err) {
+        console.error("Register Error:", err);
+        req.flash('error_message', 'Lỗi hệ thống: ' + err.message);
+        res.redirect('/register');
     }
 });
 
@@ -108,29 +97,14 @@ router.get('/login', (req, res) => {
     res.render('home/login', {title: 'Login'});
 });
 
-// Testimonials
-router.get('/testimonial', async (req, res) => {
-    try {
-        const reviews = await Review.find({ type: 'website', isActive: true })
-            .populate('user')
-            .sort({ createdAt: -1 })
-            .limit(10)
-            .lean();
-            
-        res.render('home/testimonial', { 
-            title: 'Testimonials',
-            reviews: reviews
-        });
-    } catch (err) {
-        console.error(err);
-        res.render('home/testimonial', { title: 'Testimonials' });
-    }
-});
+// ... Testimonials ...
 
-router.get('/logout', (req, res) => {
-    req.session.destroy(err => {
-        if(err) return next(err);
-        res.redirect('/login');
+router.get('/logout', (req, res, next) => {
+    req.logout(function(err) {
+        if (err) { return next(err); }
+        req.session.destroy(err => {
+             res.redirect('/login');
+        });
     });
 });
 
@@ -163,7 +137,8 @@ router.get('/', async function(req, res, next) {
             categories: categories,
             popularCourses: popularCourses,
             instructors: instructors,
-            testimonials: testimonials
+            testimonials: testimonials,
+            activePage: 'home'
         });
     } catch (err) {
         console.error(err);
@@ -178,11 +153,11 @@ router.get('/404', function(req, res, next) {
 
 
 router.get('/about', function(req, res, next) {
-    res.render('home/about', { title: 'Về chúng tôi - EnglishMaster' });
+    res.render('home/about', { title: 'Về chúng tôi - EnglishMaster', activePage: 'about' });
 });
 
 router.get('/contact', function(req, res, next) {
-    res.render('home/contact', { title: 'Liên hệ - EnglishMaster' });
+    res.render('home/contact', { title: 'Liên hệ - EnglishMaster', activePage: 'contact' });
 });
 
 router.post('/contact', function(req, res, next) {
@@ -264,7 +239,10 @@ router.get('/courses', async function(req, res, next) {
             categories: categories,
             levels: levels,
             methods: methods,
-            filters: req.query // Pass back to maintain states
+            levels: levels,
+            methods: methods,
+            filters: req.query, // Pass back to maintain states
+            activePage: 'courses'
         });
     } catch (err) {
          console.error(err);
@@ -285,7 +263,10 @@ router.get('/courses/:id', async function(req, res, next) {
             title: course.title + ' - EnglishMaster',
             course: course,
             categories: categories,
-            reviews: reviews
+            course: course,
+            categories: categories,
+            reviews: reviews,
+            activePage: 'courses'
         });
     } catch (err) {
         console.error(err);
@@ -294,7 +275,7 @@ router.get('/courses/:id', async function(req, res, next) {
 });
 
 router.post('/courses/:id/review', async function(req, res, next) {
-    if (!req.session.isAuthenticated) {
+    if (!req.isAuthenticated()) {
         req.flash('error_message', 'Vui lòng đăng nhập để đánh giá');
         req.session.returnTo = '/courses/' + req.params.id;
         return res.redirect('/login');
@@ -303,7 +284,7 @@ router.post('/courses/:id/review', async function(req, res, next) {
     try {
         const { rating, comment } = req.body;
         const newReview = new Review({
-            user: req.session.userId,
+            user: req.user._id,
             course: req.params.id,
             rating,
             comment,
@@ -321,7 +302,7 @@ router.post('/courses/:id/review', async function(req, res, next) {
 
 
 router.get('/team', function(req, res, next) {
-    res.render('home/team', { title: 'Đội ngũ giảng viên - EnglishMaster' });
+    res.render('home/team', { title: 'Đội ngũ giảng viên - EnglishMaster', activePage: 'team' });
 });
 
 router.get('/testimonial', function(req, res, next) {
@@ -356,8 +337,10 @@ router.get('/cart', async function(req, res, next) {
 
         res.render('home/cart', { 
             title: 'Giỏ hàng - EnglishMaster',
+            title: 'Giỏ hàng - EnglishMaster',
             cart: req.session.cart,
-            suggestedCourses: suggestedCourses
+            suggestedCourses: suggestedCourses,
+            activePage: 'cart'
         });
     } catch (err) {
         console.error(err);
@@ -455,7 +438,7 @@ router.post('/checkout/confirm', async function(req, res, next) {
     }
     
     // Require login for checkout
-    if (!req.session.isAuthenticated) {
+    if (!req.isAuthenticated()) {
         req.flash('error_message', 'Vui lòng đăng nhập để thanh toán');
         req.session.returnTo = '/checkout';
         return res.redirect('/login');
@@ -464,7 +447,7 @@ router.post('/checkout/confirm', async function(req, res, next) {
     try {
         const cart = req.session.cart;
         const order = new Order({
-            user: req.session.userId,
+            user: req.user._id,
             items: cart.items.map(item => ({
                 course: item._id,
                 price: item.price
@@ -477,7 +460,7 @@ router.post('/checkout/confirm', async function(req, res, next) {
         await order.save();
 
         // Enroll user in courses (simulating payment success)
-        await User.findByIdAndUpdate(req.session.userId, {
+        await User.findByIdAndUpdate(req.user._id, {
             $addToSet: { enrolledCourses: { $each: cart.items.map(item => item._id) } }
         });
 
@@ -496,20 +479,20 @@ router.post('/checkout/confirm', async function(req, res, next) {
 
 // User Profile
 router.get('/profile', async function(req, res, next) {
-    if (!req.session.isAuthenticated) {
+    if (!req.isAuthenticated()) {
         return res.redirect('/login');
     }
 
     try {
         const [orders, testResults, categories] = await Promise.all([
-            Order.find({ user: req.session.userId })
+            Order.find({ user: req.user._id })
                 .populate({
                     path: 'items.course',
                     populate: { path: 'category' }
                 })
                 .sort({ createdAt: -1 })
                 .lean(),
-            TestResult.find({ user: req.session.userId })
+            TestResult.find({ user: req.user._id })
                 .populate({
                     path: 'test',
                     populate: { path: 'category' }
@@ -540,7 +523,9 @@ router.get('/tests', async function(req, res, next) {
         res.render('home/tests', {
             title: 'Luyện thi Online - EnglishMaster',
             tests: tests,
-            isPortal: true
+            tests: tests,
+            isPortal: true,
+            activePage: 'tests'
         });
     } catch (err) {
         console.error(err);
@@ -549,7 +534,7 @@ router.get('/tests', async function(req, res, next) {
 });
 
 router.get('/tests/:id', async function(req, res, next) {
-    if (!req.session.isAuthenticated) {
+    if (!req.isAuthenticated()) {
         req.flash('error_message', 'Vui lòng đăng nhập để làm bài thi.');
         req.session.returnTo = '/tests/' + req.params.id;
         return res.redirect('/login');
@@ -567,7 +552,9 @@ router.get('/tests/:id', async function(req, res, next) {
 
         res.render('home/do-test', {
             title: 'Làm bài: ' + test.title,
-            test: test
+            title: 'Làm bài: ' + test.title,
+            test: test,
+            activePage: 'tests'
         });
     } catch (err) {
         console.error(err);
@@ -576,7 +563,7 @@ router.get('/tests/:id', async function(req, res, next) {
 });
 
 router.post('/tests/:id/submit', async function(req, res, next) {
-    if (!req.session.isAuthenticated) return res.redirect('/login');
+    if (!req.isAuthenticated()) return res.redirect('/login');
     
     try {
         const testId = req.params.id;
@@ -617,7 +604,7 @@ router.post('/tests/:id/submit', async function(req, res, next) {
         const isPassed = score >= test.passingScore;
 
         const newResult = new TestResult({
-            user: req.session.userId,
+            user: req.user._id,
             test: test._id,
             score,
             correctAnswers: correctCount,
@@ -636,7 +623,7 @@ router.post('/tests/:id/submit', async function(req, res, next) {
 });
 
 router.get('/tests/:id/result/:resultId', async function(req, res, next) {
-     if (!req.session.isAuthenticated) return res.redirect('/login');
+     if (!req.isAuthenticated()) return res.redirect('/login');
 
      try {
          const result = await TestResult.findById(req.params.resultId)
@@ -648,7 +635,7 @@ router.get('/tests/:id/result/:resultId', async function(req, res, next) {
         
         const test = await PracticeTest.findById(req.params.id).lean();
 
-        if (!result || !test || result.user.toString() !== req.session.userId) {
+        if (!result || !test || result.user.toString() !== req.user._id.toString()) {
             return res.redirect('/tests');
         }
 
@@ -676,13 +663,13 @@ router.get('/tests/:id/result/:resultId', async function(req, res, next) {
 
 // === PRACTICE PROGRAMS (TOEIC, IELTS, TOEFL) ===
 async function checkExamAccess(req, res, categoryName) {
-    if (!req.session.isAuthenticated) return res.redirect('/login');
+    if (!req.isAuthenticated()) return res.redirect('/login');
     
     try {
         const cat = await Category.findOne({ name: new RegExp(categoryName, 'i') });
         if (!cat) return res.redirect('/404');
 
-        const user = await User.findById(req.session.userId).lean();
+        const user = await User.findById(req.user._id).lean();
         if (!user) return res.redirect('/login');
 
         if (user.role === 'admin') return { cat, hasAccess: true };
@@ -781,7 +768,7 @@ router.get('/create-admin', (req, res) => {
 
 // Review Submission
 router.post('/reviews', async (req, res) => {
-    if (!req.session.isAuthenticated) {
+    if (!req.isAuthenticated()) {
         req.flash('error_message', 'Vui lòng đăng nhập để gửi đánh giá.');
         return res.redirect('back');
     }
@@ -789,7 +776,7 @@ router.post('/reviews', async (req, res) => {
     try {
         const { rating, comment, courseId, type } = req.body;
         const newReview = new Review({
-            user: req.session.userId,
+            user: req.user._id,
             course: courseId || null,
             type: type || 'course',
             rating: parseInt(rating),

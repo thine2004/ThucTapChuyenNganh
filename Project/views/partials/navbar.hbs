@@ -7,20 +7,15 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarCollapse">
         <div class="navbar-nav ms-auto p-4 p-lg-0">
-            <!-- SỬA LỖI: Chỉ dùng class active khi không có tham số đăng nhập (chỉ ở trang chủ sạch) -->
-            <a href="/" class="nav-item nav-link active">Trang chủ</a>
-
-            <a href="/about" class="nav-item nav-link">Giới thiệu</a>
-            <a href="/courses" class="nav-item nav-link">Khóa học</a>
-            <a href="/tests" class="nav-item nav-link">Thi thử</a>
-            <a href="/team" class="nav-item nav-link">Đội ngũ</a>
-
-
-            
-            <a href="/contact" class="nav-item nav-link">Liên hệ</a>
-            <a href="/cart" class="nav-item nav-link position-relative">
+            <a href="/" class="nav-item nav-link {{#if (eq activePage 'home')}}active{{/if}}">Trang chủ</a>
+            <a href="/about" class="nav-item nav-link {{#if (eq activePage 'about')}}active{{/if}}">Giới thiệu</a>
+            <a href="/courses" class="nav-item nav-link {{#if (eq activePage 'courses')}}active{{/if}}">Khóa học</a>
+            <a href="/tests" class="nav-item nav-link {{#if (eq activePage 'tests')}}active{{/if}}">Thi thử</a>
+            <a href="/team" class="nav-item nav-link {{#if (eq activePage 'team')}}active{{/if}}">Đội ngũ</a>
+            <a href="/contact" class="nav-item nav-link {{#if (eq activePage 'contact')}}active{{/if}}">Liên hệ</a>
+            <a href="/cart" class="nav-item nav-link position-relative {{#if (eq activePage 'cart')}}active{{/if}}">
                 <i class="fa fa-shopping-cart"></i> Giỏ hàng
-                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary">0</span>
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary">{{#if session.cart.totalQty}}{{session.cart.totalQty}}{{else}}0{{/if}}</span>
             </a>
         </div>
 

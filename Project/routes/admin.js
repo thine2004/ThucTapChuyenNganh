@@ -14,9 +14,10 @@ const Order = require('../models/Order');
 // Middleware kiểm tra quyền truy cập Admin
 // Middleware kiểm tra quyền truy cập Admin
 function isAdmin(req, res, next) {
-    if (req.session.isAuthenticated && req.session.userRole === 'admin') {
+    if (req.isAuthenticated() && req.user.role === 'admin') {
         return next();
     }
+    req.session.returnTo = req.originalUrl;
     req.flash('error_message', 'Access denied. You must be an admin.');
     res.redirect('/login');
 }
@@ -344,7 +345,7 @@ router.post('/product/add', function(req, res, next) {
     
     // Assumes the current logged in user is the instructor (admin is acting as one, or we should have a teacher selector)
     // For now, use the current user ID
-    const instructor = req.session.userId;
+    const instructor = req.user._id;
 
     const newCourse = new Course({
         title,
@@ -420,7 +421,7 @@ router.post('/product/edit/:id', function(req, res, next) {
 
 // Delete User - POST
 router.post('/users/delete/:id', function(req, res, next) {
-    if (req.params.id == req.session.userId) {
+    if (req.params.id == req.user._id) {
         req.flash('error_message', 'Không thể xóa tài khoản đang đăng nhập!');
         return res.redirect('/admin/users');
     }

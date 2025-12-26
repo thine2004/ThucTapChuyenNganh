@@ -7,21 +7,60 @@ const session = require('express-session');
 const { engine } = require('express-handlebars');
 const mongoose = require('mongoose');
 const bcryptjs = require('bcryptjs');
-const User = require('./models/User'); // Đảm bảo mô hình User được include
+const passport = require('passport'); // Added Passport
+const LocalStrategy = require('passport-local').Strategy; // Added LocalStrategy
+const User = require('./models/User'); 
 const flash = require('connect-flash');
 
-// --- PHẦN QUAN TRỌNG: CẤU HÌNH KẾT NỐI DATABASE ---
-const dbUrl = process.env.MONGO_URI || 'mongodb://localhost:27017/English';
+// --- CẤU HÌNH DATABASE (Theo yêu cầu) ---
+mongoose.Promise = global.Promise;
+const dbUrl = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/English';
 
 mongoose.connect(dbUrl)
   .then(() => {
-    console.log('✅ MongoDB Connected!');
-    // Log ra để biết đang kết nối vào đâu (Local hay Atlas)
-    console.log(`Connected to: ${dbUrl.includes('localhost') ? 'Localhost' : 'MongoDB Atlas (Cloud)'}`);
+    console.log("✅ MongoDB connected successfully!");
   })
   .catch(err => {
-    console.error("❌ Error connecting to mongodb:", err);
+    console.error("❌ Error connecting to MongoDB:", err);
   });
+// --------------------------------------------------
+
+// --- PASSPORT CONFIGURATION ---
+passport.use(new LocalStrategy({
+    usernameField: 'email',
+    passwordField: 'password'
+}, async (email, password, done) => {
+    try {
+        // 1. Check User
+        const user = await User.findOne({ email: email });
+        if (!user) {
+            return done(null, false, { message: 'Email không tồn tại.' });
+        }
+
+        // 2. Check Password
+        const isMatch = await bcryptjs.compare(password, user.password);
+        if (isMatch) {
+            return done(null, user);
+        } else {
+            return done(null, false, { message: 'Mật khẩu không đúng.' });
+        }
+    } catch (err) {
+        return done(err);
+    }
+}));
+
+passport.serializeUser((user, done) => {
+    done(null, user.id);
+});
+
+passport.deserializeUser(async (id, done) => {
+    try {
+        const user = await User.findById(id);
+        done(null, user);
+    } catch (err) {
+        done(err, null);
+    }
+});
 // --------------------------------------------------
 
 var app = express();
@@ -123,18 +162,29 @@ app.use(session({
 }));
 
 app.use(flash());
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Set up locals for all views
 app.use(async (req, res, next) => {
-    // Check session for authentication
-    res.locals.isLoggedIn = !!req.session.isAuthenticated;
-    res.locals.currentUserName = req.session.userName || '';
-    res.locals.currentUserRole = req.session.userRole || '';
+    // Check session for authentication (Passport uses req.user)
+    res.locals.isLoggedIn = !!req.user; // Changed from req.session.isAuthenticated
+    res.locals.currentUserName = req.user ? (req.user.firstName + ' ' + req.user.lastName) : '';
+    res.locals.currentUserRole = req.user ? req.user.role : '';
 
-    // Fetch full user object if logged in
-    if (req.session.userId) {
+    // Fetch full user object if logged in (Already in req.user due to deserialize, but we might want populated data)
+    // Passport's deserializeUser above returns the user doc.
+    // However, the original code had population logic. Let's keep it or optimize.
+    // Passport deserialize typically is just ID -> User. 
+    // The original logic populated enrolledCourses. 
+    // Let's modify deserializeUser to populate OR do it here. 
+    // Doing it here is safer to avoid affecting every request if not needed, but local variables are for views.
+    
+    if (req.user) {
+        // Re-populate if needed or rely on what deserialize gave us.
+        // Let's re-fetch to be consistent with original logic (populating courses)
         try {
-            const user = await User.findById(req.session.userId).populate({
+            const user = await User.findById(req.user._id).populate({
                 path: 'enrolledCourses',
                 populate: { path: 'category' }
             }).lean();
@@ -145,16 +195,22 @@ app.use(async (req, res, next) => {
                 res.locals.unlockedCategories = [];
             }
         } catch (err) {
-            console.error("Error fetching user for locals:", err);
-            res.locals.unlockedCategories = [];
+             console.error("Error fetching user for locals:", err);
+             res.locals.unlockedCategories = [];
         }
     } else {
         res.locals.unlockedCategories = [];
     }
 
     // Messages and user data
+    // Passport puts authentication errors in 'error' flash by default if failureFlash: true
     res.locals.success_message = req.flash('success_message');
     res.locals.error_message = req.flash('error_message');
+    res.locals.passport_error = req.flash('error'); // Standard passport error
+    if (res.locals.passport_error.length > 0) {
+        res.locals.error_message = res.locals.passport_error; // Merge to common variable
+    }
+
     res.locals.message = req.query.message || req.session.message || ''; // Keep backward compatibility
 
     // Clear any session messages after they're used
@@ -166,22 +222,20 @@ app.use(async (req, res, next) => {
     next();
 });
 
-
-// Public routes (no authentication required)
-// NOTE: Admin routes MOVED UP to ensure they are checked before indexRouter catch-alls
-// Admin routes (protected)
+// Update Auth Guard Middleware
 const requireAuth = (req, res, next) => {
-    if (!req.session.isAuthenticated) {
-        if (req.accepts('json') && !req.accepts('html')) {
-            return res.status(401).json({
-                success: false,
-                message: 'Unauthorized: Please log in first'
-            });
-        }
-        req.session.returnTo = req.originalUrl;
-        return res.redirect('/login');
+    if (req.isAuthenticated()) { // Passport method
+        return next();
     }
-    next();
+    // ... rest of logic
+    if (req.accepts('json') && !req.accepts('html')) {
+        return res.status(401).json({
+            success: false,
+            message: 'Unauthorized: Please log in first'
+        });
+    }
+    req.session.returnTo = req.originalUrl;
+    return res.redirect('/login');
 };
 
 app.use('/admin', requireAuth, adminRouter);
