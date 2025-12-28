@@ -41,6 +41,9 @@
                                     {{#if this.isActive}}Ẩn{{else}}Hiện{{/if}}
                                 </button>
                             </form>
+                            <form action="/admin/reviews/delete/{{this._id}}?_method=DELETE" method="POST" style="display:inline;" onsubmit="return confirm('Xóa đánh giá này?')">
+                                <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
+                            </form>
                         </td>
                     </tr>
                 {{else}}

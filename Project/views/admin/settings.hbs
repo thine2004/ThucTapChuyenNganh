@@ -1,0 +1,342 @@
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Cấu hình Giao diện Website</h1>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <ul class="nav nav-tabs card-header-tabs" id="settingTabs" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="branding-tab" data-toggle="tab" href="#branding" role="tab">Chung & Banner</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="about-tab" data-toggle="tab" href="#about" role="tab">Giới thiệu & Đặc điểm</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="team-tab" data-toggle="tab" href="#team" role="tab">Đội ngũ & Con số</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="contact-tab" data-toggle="tab" href="#contact" role="tab">Liên hệ & FAQ</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="homepage-tab" data-toggle="tab" href="#homepage" role="tab">Tiêu đề Trang chủ</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="footer-tab" data-toggle="tab" href="#footer" role="tab">Liên hệ & Mạng xã hội</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-body">
+                <form action="/admin/settings" method="POST" enctype="multipart/form-data">
+                    <div class="tab-content" id="settingTabsContent">
+                        
+                        <!-- TAB: Branding & Hero -->
+                        <div class="tab-pane fade show active" id="branding" role="tabpanel">
+                            <div class="row">
+                                <div class="col-md-6 border-right">
+                                    <h5 class="font-weight-bold text-primary mb-3">Thương hiệu & Logo</h5>
+                                    <div class="form-group mb-3">
+                                        <label>Tên Website (Logo Text) <span class="text-danger">*</span></label>
+                                        <input type="text" name="logoText" class="form-control" value="{{settings.logoText}}" required>
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label>Icon Logo (FontAwesome class)</label>
+                                        <input type="text" name="logoIcon" class="form-control" value="{{settings.logoIcon}}" placeholder="fa-language, fa-graduation-cap...">
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label>Tiêu đề Trang (SEO Title)</label>
+                                        <input type="text" name="siteTitle" class="form-control" value="{{settings.siteTitle}}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Mô tả ngắn (SEO Description)</label>
+                                        <textarea name="siteDescription" class="form-control" rows="2">{{settings.siteDescription}}</textarea>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5 class="font-weight-bold text-primary mb-3">Hero Banner (Trang chủ)</h5>
+                                    <div class="form-group mb-3">
+                                         <label>Ảnh Banner (Tải lên)</label>
+                                         <input type="file" name="heroImageFile" class="form-control-file mb-2">
+                                         <label class="small text-muted">Hoặc nhập Link Ảnh</label>
+                                         <input type="text" name="heroImage" class="form-control" value="{{settings.heroImage}}">
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label>Tiêu đề Chính</label>
+                                        <input type="text" name="heroTitle" class="form-control" value="{{settings.heroTitle}}">
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label>Tiêu đề Phụ</label>
+                                        <input type="text" name="heroSubtitle" class="form-control" value="{{settings.heroSubtitle}}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Mô tả Hero</label>
+                                        <textarea name="heroDescription" class="form-control" rows="2">{{settings.heroDescription}}</textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TAB: About & Features -->
+                        <div class="tab-pane fade" id="about" role="tabpanel">
+                            <h5 class="font-weight-bold text-success mb-3">Phần Giới Thiệu (About Us)</h5>
+                            <div class="row mb-4 bg-light p-3 rounded">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label>Tiêu đề Giới thiệu</label>
+                                        <input type="text" name="aboutTitle" class="form-control" value="{{settings.aboutTitle}}">
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label>Ảnh Giới thiệu (Tải lên)</label>
+                                        <input type="file" name="aboutImageFile" class="form-control-file mb-2">
+                                        <label class="small text-muted">Hoặc nhập Link Ảnh</label>
+                                        <input type="text" name="aboutImage" class="form-control" value="{{settings.aboutImage}}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Nội dung Giới thiệu</label>
+                                        <textarea name="aboutDescription" class="form-control" rows="5">{{settings.aboutDescription}}</textarea>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Các điểm nổi bật (Mỗi dòng một ý)</label>
+                                        <textarea name="aboutPointsRaw" class="form-control" rows="9">{{#each settings.aboutPoints}}{{this}}&#13;{{/each}}</textarea>
+                                        <small class="text-muted">Danh sách sáu gạch đầu dòng phía dưới đoạn văn giới thiệu.</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <h5 class="font-weight-bold text-info mb-3">Các Đặc Điểm Nổi Bật (4 Ô phía trên)</h5>
+                            <div class="row">
+                                {{#each settings.features}}
+                                <div class="col-md-3">
+                                    <div class="card mb-3">
+                                        <div class="card-header bg-info text-white py-1">Ô {{addOne @index}}</div>
+                                        <div class="card-body p-2">
+                                            <div class="form-group mb-2">
+                                                <label class="small mb-0">Icon (fa-*)</label>
+                                                <input type="text" name="featureIcon[]" class="form-control form-control-sm" value="{{this.icon}}">
+                                            </div>
+                                            <div class="form-group mb-2">
+                                                <label class="small mb-0">Tiêu đề</label>
+                                                <input type="text" name="featureTitle[]" class="form-control form-control-sm" value="{{this.title}}">
+                                            </div>
+                                            <div class="form-group mb-0">
+                                                <label class="small mb-0">Mô tả</label>
+                                                <textarea name="featureDescription[]" class="form-control form-control-sm" rows="3">{{this.description}}</textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {{/each}}
+                            </div>
+                        </div>
+
+                        <!-- TAB: Team & Stats -->
+                        <div class="tab-pane fade" id="team" role="tabpanel">
+                            <h5 class="font-weight-bold text-warning mb-3">Phần Đội Ngũ (Team Section)</h5>
+                            <div class="row mb-4 bg-light p-3 rounded">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label>Tiêu đề chính (Heading)</label>
+                                        <input type="text" name="teamTitle" class="form-control" value="{{settings.teamTitle}}">
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label>Tiêu đề nhỏ (Sub-title)</label>
+                                        <input type="text" name="teamSubtitle" class="form-control" value="{{settings.teamSubtitle}}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Mô tả đội ngũ</label>
+                                        <textarea name="teamDescription" class="form-control" rows="3">{{settings.teamDescription}}</textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h5 class="font-weight-bold text-danger mb-3">Các Con Số Thống Kê (Statistics)</h5>
+                            <div class="row mb-4">
+                                {{#each settings.stats}}
+                                <div class="col-md-3">
+                                    <div class="card mb-3">
+                                        <div class="card-header bg-danger text-white py-1">Số {{addOne @index}}</div>
+                                        <div class="card-body p-2">
+                                            <div class="form-group mb-2">
+                                                <label class="small mb-0">Giá trị (Số)</label>
+                                                <input type="text" name="statValue[]" class="form-control form-control-sm" value="{{this.value}}">
+                                            </div>
+                                            <div class="form-group mb-0">
+                                                <label class="small mb-0">Nhãn (Label)</label>
+                                                <input type="text" name="statLabel[]" class="form-control form-control-sm" value="{{this.label}}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {{/each}}
+                            </div>
+
+                            <h5 class="font-weight-bold text-secondary mb-3">Kêu gọi hành động (Team CTA)</h5>
+                            <div class="row bg-light p-3 rounded">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label>Tiêu đề CTA</label>
+                                        <input type="text" name="teamCtaTitle" class="form-control" value="{{settings.teamCtaTitle}}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Mô tả CTA</label>
+                                        <textarea name="teamCtaDescription" class="form-control" rows="2">{{settings.teamCtaDescription}}</textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TAB: Contact & FAQ -->
+                        <div class="tab-pane fade" id="contact" role="tabpanel">
+                            <h5 class="font-weight-bold text-primary mb-3">Trang Liên Hệ (Contact Page)</h5>
+                            <div class="row mb-4 bg-light p-3 rounded">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label>Tiêu đề chính (Heading)</label>
+                                        <input type="text" name="contactTitle" class="form-control" value="{{settings.contactTitle}}">
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label>Tiêu đề nhỏ (Sub-title)</label>
+                                        <input type="text" name="contactSubtitle" class="form-control" value="{{settings.contactSubtitle}}">
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label>Mô tả liên hệ</label>
+                                        <textarea name="contactDescription" class="form-control" rows="2">{{settings.contactDescription}}</textarea>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label>Link Google Maps (Iframe Source)</label>
+                                        <input type="text" name="contactMapsUrl" class="form-control" value="{{settings.contactMapsUrl}}">
+                                        <small class="text-muted">Dán link từ thuộc tính 'src' của mã nhúng iframe.</small>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Giờ làm việc</label>
+                                        <textarea name="contactWorkingHours" class="form-control" rows="2">{{settings.contactWorkingHours}}</textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h5 class="font-weight-bold text-success mb-3">Câu Hỏi Thường Gặp (FAQs)</h5>
+                            <div class="row">
+                                {{#each settings.faqs}}
+                                <div class="col-md-4">
+                                    <div class="card mb-3 shadow-sm">
+                                        <div class="card-header bg-success text-white py-1">Câu hỏi {{addOne @index}}</div>
+                                        <div class="card-body p-2">
+                                            <div class="form-group mb-2">
+                                                <label class="small mb-0">Câu hỏi</label>
+                                                <input type="text" name="faqQuestion[]" class="form-control form-control-sm" value="{{this.question}}">
+                                            </div>
+                                            <div class="form-group mb-0">
+                                                <label class="small mb-0">Câu trả lời</label>
+                                                <textarea name="faqAnswer[]" class="form-control form-control-sm" rows="3">{{this.answer}}</textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {{/each}}
+                            </div>
+                        </div>
+
+                        <!-- TAB: Homepage Headings -->
+                        <div class="tab-pane fade" id="homepage" role="tabpanel">
+                            <h5 class="font-weight-bold text-dark mb-3">Tiêu đề các mục Trang Chủ (Homepage Headings)</h5>
+                            <div class="row bg-light p-3 rounded">
+                                <div class="col-md-4 border-right">
+                                    <h6 class="font-weight-bold text-primary">Mục Khóa Học</h6>
+                                    <div class="form-group mb-2">
+                                        <label class="small">Tiêu đề chính</label>
+                                        <input type="text" name="coursesTitle" class="form-control" value="{{settings.coursesTitle}}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="small">Tiêu đề nhỏ</label>
+                                        <input type="text" name="coursesSubtitle" class="form-control" value="{{settings.coursesSubtitle}}">
+                                    </div>
+                                </div>
+                                <div class="col-md-4 border-right">
+                                    <h6 class="font-weight-bold text-success">Mục Bài Viết</h6>
+                                    <div class="form-group mb-2">
+                                        <label class="small">Tiêu đề chính</label>
+                                        <input type="text" name="blogTitle" class="form-control" value="{{settings.blogTitle}}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="small">Tiêu đề nhỏ</label>
+                                        <input type="text" name="blogSubtitle" class="form-control" value="{{settings.blogSubtitle}}">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6 class="font-weight-bold text-info">Mục Đánh Giá</h6>
+                                    <div class="form-group mb-2">
+                                        <label class="small">Tiêu đề chính</label>
+                                        <input type="text" name="testimonialTitle" class="form-control" value="{{settings.testimonialTitle}}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="small">Tiêu đề nhỏ</label>
+                                        <input type="text" name="testimonialSubtitle" class="form-control" value="{{settings.testimonialSubtitle}}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TAB: Footer & Social -->
+                        <div class="tab-pane fade" id="footer" role="tabpanel">
+                            <div class="row">
+                                <div class="col-md-6 border-right">
+                                    <h5 class="font-weight-bold text-primary mb-3">Thông tin Footer</h5>
+                                    <div class="form-group mb-3">
+                                        <label>Giới thiệu ngắn ở Footer</label>
+                                        <textarea name="footerAbout" class="form-control" rows="3">{{settings.footerAbout}}</textarea>
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label>Địa chỉ</label>
+                                        <input type="text" name="footerAddress" class="form-control" value="{{settings.footerAddress}}">
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label>Số điện thoại</label>
+                                        <input type="text" name="footerPhone" class="form-control" value="{{settings.footerPhone}}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Email liên hệ</label>
+                                        <input type="email" name="footerEmail" class="form-control" value="{{settings.footerEmail}}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5 class="font-weight-bold text-primary mb-3">Mạng xã hội (Social Links)</h5>
+                                    <div class="form-group mb-3">
+                                        <label><i class="fab fa-facebook text-primary mr-2"></i> Facebook Link</label>
+                                        <input type="text" name="socialFacebook" class="form-control" value="{{settings.socialFacebook}}">
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label><i class="fab fa-youtube text-danger mr-2"></i> Youtube Link</label>
+                                        <input type="text" name="socialYoutube" class="form-control" value="{{settings.socialYoutube}}">
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label><i class="fab fa-linkedin text-info mr-2"></i> Linkedin Link</label>
+                                        <input type="text" name="socialLinkedin" class="form-control" value="{{settings.socialLinkedin}}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label><i class="fab fa-tiktok text-dark mr-2"></i> Tiktok Link</label>
+                                        <input type="text" name="socialTiktok" class="form-control" value="{{settings.socialTiktok}}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div> <!-- End tab-content -->
+
+                    <hr class="my-4">
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary btn-lg px-5 shadow">Lưu tất cả thay đổi</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

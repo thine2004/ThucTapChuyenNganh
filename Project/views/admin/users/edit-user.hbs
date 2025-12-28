@@ -10,7 +10,14 @@
         <h6 class="m-0 font-weight-bold text-primary">Cập nhật thông tin</h6>
     </div>
     <div class="card-body">
-        <form action="/admin/users/edit/{{user._id}}?_method=PUT" method="POST">
+        <form action="/admin/users/edit/{{user._id}}?_method=PUT" method="POST" enctype="multipart/form-data">
+            <div class="form-group text-center mb-4">
+                <img src="{{#if user.avatar}}{{user.avatar}}{{else}}/images/default-avatar.png{{/if}}" 
+                     class="img-profile rounded-circle mb-2" style="width: 100px; height: 100px; object-fit: cover;">
+                <br>
+                <label for="avatarFile" class="btn btn-sm btn-outline-primary">Thay đổi ảnh đại diện</label>
+                <input type="file" class="form-control-file d-none" id="avatarFile" name="avatarFile">
+            </div>
             <div class="form-row">
                 <div class="form-group col-md-6">
                     <label for="firstName">Tên (First Name) <span class="text-danger">*</span></label>
@@ -46,30 +53,7 @@
                 </select>
             </div>
 
-            <hr>
-            <h6 class="font-weight-bold text-primary mb-3">Đánh giá Năng lực (Proficiency Levels)</h6>
-            <div class="alert alert-light border small">
-                <i class="fa fa-info-circle"></i> Các mục đánh giá được lấy tự động từ các <b>Danh mục</b> có đánh dấu là <b>Luyện thi (isExam)</b>.
-            </div>
-            
-            <div class="row">
-                {{#each examCategories}}
-                <div class="col-md-4 mb-3">
-                    <label for="level_{{this.name}}">{{this.name}} (Max: {{this.maxScore}})</label>
-                    <input type="number" step="0.1" class="form-control" 
-                           id="level_{{this.name}}" 
-                           name="levels[{{this.name}}]" 
-                           value="{{getMapValue ../user.levels this.name}}" 
-                           placeholder="Nhập điểm...">
-                </div>
-                {{/each}}
-                
-                {{#unless examCategories}}
-                <div class="col-12">
-                    <p class="text-muted italic">Chưa có danh mục thi nào được tạo. Hãy vào mục <a href="/admin/category">Danh mục</a> để thiết lập.</p>
-                </div>
-                {{/unless}}
-            </div>
+
 
             <button type="submit" class="btn btn-primary">
                 <i class="fa fa-save"></i> Cập nhật

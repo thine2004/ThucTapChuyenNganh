@@ -14,17 +14,13 @@
                 <a href="#info" data-bs-toggle="list" class="list-group-item list-group-item-action active">
                     <i class="fa fa-user me-2"></i> Thông tin cá nhân
                 </a>
-                <a href="#orders" data-bs-toggle="list" class="list-group-item list-group-item-action">
-                    <i class="fa fa-shopping-bag me-2"></i> Lịch sử đơn hàng
+
+                <a href="#contacts" data-bs-toggle="list" class="list-group-item list-group-item-action">
+                    <i class="fa fa-envelope me-2"></i> Liên hệ của tôi
                 </a>
-                <a href="#exams" data-bs-toggle="list" class="list-group-item list-group-item-action">
-                    <i class="fa fa-graduation-cap me-2"></i> Luyện thi
-                </a>
-                <a href="#resources" data-bs-toggle="list" class="list-group-item list-group-item-action">
-                    <i class="fa fa-book me-2"></i> Tài nguyên
-                </a>
-                <a href="#test-history" data-bs-toggle="list" class="list-group-item list-group-item-action">
-                    <i class="fa fa-history me-2"></i> Lịch sử luyện thi
+
+                <a href="#reviews" data-bs-toggle="list" class="list-group-item list-group-item-action">
+                    <i class="fa fa-star me-2"></i> Đánh giá của tôi
                 </a>
                 {{#if (eq user.role 'admin')}}
                 <a href="/admin" class="list-group-item list-group-item-action text-primary">
@@ -41,286 +37,136 @@
             <div class="tab-content">
                 <!-- User Info Tab -->
                 <div class="tab-pane fade show active" id="info">
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-white">
-                            <h5 class="mb-0">Thông tin tài khoản</h5>
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white py-3">
+                            <h5 class="mb-0 fw-bold">Thông tin tài khoản</h5>
                         </div>
                         <div class="card-body">
-                            <form>
-                                <div class="mb-3">
-                                    <label class="form-label text-muted">Họ và tên</label>
-                                    <p class="fw-bold">{{user.firstName}} {{user.lastName}}</p>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label text-muted">Email</label>
-                                    <p class="fw-bold">{{user.email}}</p>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label text-muted">Vai trò</label>
-                                    <p class="fw-bold">{{user.role}}</p>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label text-muted">Ngày tham gia</label>
-                                    <p class="fw-bold">{{user.createdAt}}</p>
-                                </div>
-                            </form>
-                            
-                            <hr class="my-4">
-                            
-                            <h5 class="mb-4 d-flex align-items-center">
-                                <i class="fa fa-chart-line text-primary me-2"></i> Trình độ Năng lực
-                            </h5>
-                            
-                            <div class="row text-center">
-                                {{#each examCategories}}
-                                <div class="col-md-4">
-                                    <div class="p-3 border rounded-3 bg-light shadow-sm mb-3">
-                                        <div class="text-uppercase text-muted small fw-bold mb-1">{{this.name}}</div>
-                                        <div class="h2 mb-0 text-primary">
-                                            {{getMapValue ../user.levels this.name}}
-                                        </div>
-                                        <small class="text-muted">/ {{this.maxScore}}</small>
-                                        <div class="progress mt-2" style="height: 6px;">
-                                            <div class="progress-bar bg-primary" role="progressbar" 
-                                                 style="width: {{percentage (getMapValue ../user.levels this.name) this.maxScore}}%"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                {{/each}}
-                                
-                                {{#unless examCategories}}
-                                <div class="col-12">
-                                    <p class="text-muted small">Thông tin trình độ đang được cập nhật...</p>
-                                </div>
-                                {{/unless}}
+                            <div class="mb-4">
+                                <label class="form-label text-muted small text-uppercase">Họ và tên</label>
+                                <p class="h6 mb-0">{{user.firstName}} {{user.lastName}}</p>
                             </div>
-                            
-                            <div class="alert alert-info mt-3 small">
-                                <i class="fa fa-info-circle me-1"></i> Trình độ của bạn được đánh giá dựa trên kết quả các bài luyện thi thực tế và cập nhật từ hệ thống.
+                            <div class="mb-4">
+                                <label class="form-label text-muted small text-uppercase">Email</label>
+                                <p class="h6 mb-0">{{user.email}}</p>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label text-muted small text-uppercase">Vai trò</label>
+                                <p class="h6 mb-0 text-capitalize">{{user.role}}</p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-muted small text-uppercase">Ngày tham gia</label>
+                                <p class="h6 mb-0">{{formatDate user.createdAt}}</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Orders Tab -->
-                <div class="tab-pane fade" id="orders">
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-white">
-                            <h5 class="mb-0">Đơn hàng của tôi</h5>
+                <!-- My Contacts Tab -->
+                <div class="tab-pane fade" id="contacts">
+                    <div class="card shadow-sm border-0">
+                         <div class="card-header bg-white py-3">
+                            <h5 class="mb-0 fw-bold">Yêu cầu liên hệ của tôi</h5>
                         </div>
-                        <div class="card-body">
-                            {{#if orders}}
-                                <div class="table-responsive">
-                                    <table class="table table-hover">
-                                        <thead>
-                                            <tr>
-                                                <th>Mã đơn</th>
-                                                <th>Ngày đặt</th>
-                                                <th>Tổng tiền</th>
-                                                <th>Trạng thái</th>
-                                                <th>Chi tiết</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {{#each orders}}
-                                            <tr>
-                                                <td><small>#{{this._id}}</small></td>
-                                                <td>{{formatDate this.createdAt}}</td>
-                                                <td class="text-primary fw-bold">{{this.totalAmount}}₫</td>
-                                                <td>
-                                                    {{#if (eq this.status 'completed')}}
-                                                        <span class="badge bg-success">Hoàn thành</span>
-                                                    {{else if (eq this.status 'pending')}}
-                                                        <span class="badge bg-warning text-dark">Chờ xử lý</span>
-                                                    {{else}}
-                                                        <span class="badge bg-danger">Đã hủy</span>
-                                                    {{/if}}
-                                                </td>
-                                                <td>
-                                                    <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#order-{{this._id}}">
-                                                        Xem
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                            <tr class="collapse" id="order-{{this._id}}">
-                                                <td colspan="5" class="bg-light">
-                                                    <ul class="list-group list-group-flush">
-                                                        {{#each this.items}}
-                                                            <li class="list-group-item bg-light d-flex justify-content-between align-items-center">
-                                                                <div>
-                                                                    <strong>{{this.course.title}}</strong>
-                                                                </div>
-                                                                <span>{{this.price}}₫</span>
-                                                            </li>
-                                                        {{/each}}
-                                                    </ul>
-                                                </td>
-                                            </tr>
-                                            {{/each}}
-                                        </tbody>
-                                    </table>
+                        <div class="card-body p-0">
+                             {{#if contacts}}
+                             <div class="table-responsive">
+                                 <table class="table table-hover mb-0 align-middle">
+                                     <thead class="bg-light">
+                                         <tr>
+                                             <th class="ps-4">Ngày gửi</th>
+                                             <th>Nội dung</th>
+                                             <th>Phản hồi công khai</th>
+                                             <th>Trạng thái</th>
+                                         </tr>
+                                     </thead>
+                                     <tbody>
+                                         {{#each contacts}}
+                                         <tr>
+                                             <td class="ps-4"><small>{{formatDate this.createdAt}}</small></td>
+                                             <td>
+                                                 <div style="max-width: 250px;" class="text-truncate">
+                                                     <strong>{{this.course}}</strong><br>
+                                                     <span class="text-muted small">{{this.message}}</span>
+                                                 </div>
+                                             </td>
+                                             <td>
+                                                 {{#if this.adminNotes}}
+                                                 <div style="max-width: 250px; white-space: normal;">
+                                                     <span class="text-success small fw-bold"><i class="fa fa-reply me-1"></i> Admin:</span>
+                                                     <p class="mb-0 small">{{this.adminNotes}}</p>
+                                                 </div>
+                                                 {{else}}
+                                                 <span class="text-muted small italic">Đang chờ phản hồi...</span>
+                                                 {{/if}}
+                                             </td>
+                                             <td>
+                                                 {{#if_eq this.status 'new'}}
+                                                 <span class="badge rounded-pill bg-info text-dark">Mới</span>
+                                                 {{/if_eq}}
+                                                 {{#if_eq this.status 'contacted'}}
+                                                 <span class="badge rounded-pill bg-success">Đã liên hệ</span>
+                                                 {{/if_eq}}
+                                                 {{#if_eq this.status 'read'}}
+                                                 <span class="badge rounded-pill bg-secondary">Đã xem</span>
+                                                 {{/if_eq}}
+                                             </td>
+                                         </tr>
+                                         {{/each}}
+                                     </tbody>
+                                 </table>
+                             </div>
+                             {{else}}
+                                <div class="text-center py-5">
+                                    <i class="fa fa-envelope-open text-muted mb-3" style="font-size: 3rem;"></i>
+                                    <p class="text-muted">Bạn chưa gửi yêu cầu liên hệ nào.</p>
+                                    <a href="/contact" class="btn btn-primary">Gửi yêu cầu ngay</a>
                                 </div>
-                            {{else}}
-                                <div class="text-center py-4">
-                                    <img src="/img/empty-cart.png" alt="Empty" style="width: 100px; opacity: 0.5">
-                                    <p class="text-muted mt-3">Bạn chưa có đơn hàng nào.</p>
-                                    <a href="/courses" class="btn btn-primary">Khám phá khóa học</a>
-                                </div>
-                            {{/if}}
+                             {{/if}}
                         </div>
                     </div>
                 </div>
 
-                <!-- Exams Tab -->
-                <div class="tab-pane fade" id="exams">
-                    <div class="card shadow-sm">
-                         <div class="card-header bg-white">
-                            <h5 class="mb-0">Chương trình Luyện thi</h5>
+                <!-- My Reviews Tab -->
+                <div class="tab-pane fade" id="reviews">
+                    <div class="card shadow-sm border-0">
+                         <div class="card-header bg-white py-3">
+                            <h5 class="mb-0 fw-bold">Đánh giá của tôi</h5>
                         </div>
                         <div class="card-body">
-                            <div class="row g-3">
-                                {{!-- Dynamic Categories from DB --}}
-                                {{#each categories}}
-                                <div class="col-md-6">
-                                    <div class="p-3 border rounded text-center h-100 position-relative">
-                                        {{#if (includes ../unlockedCategories this.name)}}
-                                            <span class="badge bg-success position-absolute top-0 end-0 m-2">Đã mở</span>
-                                            <i class="fa fa-medal fa-3x text-warning mb-3"></i>
-                                            <h5>Luyện thi {{this.name}}</h5>
-                                            <p class="text-muted small">{{this.description}}</p>
-                                            <a href="/{{this.slug}}" class="btn btn-sm btn-primary">Vào học ngay</a>
-                                        {{else if (eq ../user.role 'admin')}}
-                                            <span class="badge bg-info position-absolute top-0 end-0 m-2">Admin</span>
-                                            <i class="fa fa-medal fa-3x text-warning mb-3"></i>
-                                            <h5>Luyện thi {{this.name}}</h5>
-                                            <p class="text-muted small">{{this.description}}</p>
-                                            <a href="/{{this.slug}}" class="btn btn-sm btn-primary">Vào học ngay</a>
-                                        {{else}}
-                                            <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="background: rgba(255,255,255,0.7); border-radius: 8px;">
-                                                <i class="fa fa-lock fa-3x text-muted"></i>
-                                            </div>
-                                            <i class="fa fa-medal fa-3x text-secondary mb-3"></i>
-                                            <h5>Luyện thi {{this.name}}</h5>
-                                            <p class="text-muted small">{{this.description}}</p>
-                                            <a href="/courses?category={{this._id}}" class="btn btn-sm btn-outline-secondary">Mua khóa học</a>
-                                        {{/if}}
-                                    </div>
-                                </div>
-                                {{/each}}
-
-                                {{!-- Practice remains static as it's a general link --}}
-                                <div class="col-md-6">
-                                    <div class="p-3 border rounded text-center h-100">
-                                        <i class="fa fa-edit fa-3x text-success mb-3"></i>
-                                        <h5>Đề luyện tập</h5>
-                                        <p class="text-muted small">Kho đề phong phú</p>
-                                        <a href="/tests" class="btn btn-sm btn-outline-primary">Truy cập</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Resources Tab -->
-                <div class="tab-pane fade" id="resources">
-                    <div class="card shadow-sm">
-                         <div class="card-header bg-white">
-                            <h5 class="mb-0">Kho Tài nguyên</h5>
-                        </div>
-                        <div class="card-body">
-                             {{#if enrolledCourses}}
-                             <h6 class="mb-3">Khóa học của bạn</h6>
-                             <div class="list-group mb-4">
-                                 {{#each enrolledCourses}}
-                                 <a href="/courses/{{this._id}}/learn" class="list-group-item list-group-item-action d-flex align-items-center">
-                                     <img src="{{this.thumbnail}}" alt="{{this.title}}" class="rounded me-3" style="width: 60px; height: 40px; object-fit: cover;">
-                                     <div class="flex-grow-1">
-                                         <h6 class="mb-0">{{this.title}}</h6>
-                                         <small class="text-muted">Tiếp tục học</small>
+                             {{#if reviews}}
+                             <div class="row g-3">
+                                 {{#each reviews}}
+                                 <div class="col-12">
+                                     <div class="p-3 border rounded">
+                                         <div class="d-flex justify-content-between align-items-center mb-2">
+                                             <div class="text-primary">
+                                                 {{#each (range 1 this.rating)}}
+                                                 <i class="fa fa-star"></i>
+                                                 {{/each}}
+                                             </div>
+                                             <small class="text-muted">{{formatDate this.createdAt}}</small>
+                                         </div>
+                                         <p class="mb-1 fw-bold">{{#if this.course}}{{this.course.title}}{{else}}Đánh giá Website{{/if}}</p>
+                                         <p class="mb-0 text-muted small">"{{this.comment}}"</p>
+                                         {{#unless this.isActive}}
+                                         <span class="badge bg-warning text-dark mt-2 small" style="font-size: 0.7rem;">Đang chờ duyệt</span>
+                                         {{/unless}}
                                      </div>
-                                     <i class="fa fa-chevron-right text-muted"></i>
-                                 </a>
+                                 </div>
                                  {{/each}}
                              </div>
-                             <h6 class="mb-3">Tài liệu tham khảo</h6>
+                             {{else}}
+                                <div class="text-center py-5">
+                                    <i class="fa fa-star-half-alt text-muted mb-3" style="font-size: 3rem;"></i>
+                                    <p class="text-muted">Bạn chưa có đánh giá nào.</p>
+                                    <a href="/courses" class="btn btn-primary">Đăng ký và đánh giá ngay</a>
+                                </div>
                              {{/if}}
-
-                             <div class="list-group">
-                                <a href="/grammar" class="list-group-item list-group-item-action d-flex align-items-center">
-                                    <i class="fa fa-spell-check text-primary me-3 fa-lg"></i>
-                                    <div>
-                                        <h6 class="mb-0">Ngữ pháp (Grammar)</h6>
-                                        <small class="text-muted">Tổng hợp chủ điểm ngữ pháp quan trọng.</small>
-                                    </div>
-                                </a>
-                                <a href="/vocabulary" class="list-group-item list-group-item-action d-flex align-items-center">
-                                    <i class="fa fa-font text-success me-3 fa-lg"></i>
-                                    <div>
-                                        <h6 class="mb-0">Từ vựng (Vocabulary)</h6>
-                                        <small class="text-muted">3000 từ vựng thông dụng theo chủ đề.</small>
-                                    </div>
-                                </a>
-                                <a href="/testimonial" class="list-group-item list-group-item-action d-flex align-items-center">
-                                    <i class="fa fa-comments text-info me-3 fa-lg"></i>
-                                    <div>
-                                        <h6 class="mb-0">Góc Học viên</h6>
-                                        <small class="text-muted">Chia sẻ kinh nghiệm và cảm nhận.</small>
-                                    </div>
-                                </a>
-                            </div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Test History Tab -->
-                <div class="tab-pane fade" id="test-history">
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-white">
-                            <h5 class="mb-0">Kết quả luyện thi của tôi</h5>
-                        </div>
-                        <div class="card-body">
-                            {{#if testResults}}
-                                <div class="table-responsive">
-                                    <table class="table table-hover">
-                                        <thead>
-                                            <tr>
-                                                <th>Đề thi</th>
-                                                <th>Ngày làm</th>
-                                                <th>Điểm số</th>
-                                                <th>Số câu đúng</th>
-                                                <th>Kết quả</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {{#each testResults}}
-                                            <tr>
-                                                <td><strong>{{this.test.title}}</strong></td>
-                                                <td><small>{{formatDate this.createdAt}}</small></td>
-                                                <td class="text-primary fw-bold">{{this.score}}/{{this.test.totalScore}}</td>
-                                                <td>{{this.correctAnswers}}/{{this.totalQuestions}}</td>
-                                                <td>
-                                                    {{#if this.isPassed}}
-                                                        <span class="badge bg-success">ĐẠT</span>
-                                                    {{else}}
-                                                        <span class="badge bg-danger">CHƯA ĐẠT</span>
-                                                    {{/if}}
-                                                </td>
-                                            </tr>
-                                            {{/each}}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            {{else}}
-                                <div class="text-center py-4">
-                                    <i class="fa fa-pencil-alt fa-3x text-muted mb-3"></i>
-                                    <p class="text-muted">Bạn chưa thực hiện bài thi thử nào.</p>
-                                    <a href="#exams" data-bs-toggle="list" class="btn btn-outline-primary">Làm bài ngay</a>
-                                </div>
-                            {{/if}}
-                        </div>
-                    </div>
-                </div>
+            </div>
             </div>
         </div>
     </div>

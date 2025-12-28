@@ -1,0 +1,33 @@
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="row g-5">
+            <div class="col-lg-8">
+                <div class="mb-5 wow fadeInUp" data-wow-delay="0.1s">
+                    <img class="img-fluid w-100 rounded mb-4" src="{{post.thumbnail}}" alt="{{post.title}}">
+                    <div class="d-flex mb-3">
+                        <small class="me-3"><i class="fa fa-user text-primary me-2"></i>{{post.author.firstName}} {{post.author.lastName}}</small>
+                        <small class="me-3"><i class="fa fa-calendar-alt text-primary me-2"></i>{{formatDate post.createdAt}}</small>
+                    </div>
+                    <h1 class="mb-4">{{post.title}}</h1>
+                    <div class="content">
+                        {{{post.content}}}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <!-- Sidebar maybe? -->
+                <div class="bg-light p-4 rounded mb-5 wow fadeInUp" data-wow-delay="0.1s">
+                    <h4 class="mb-4">Thông tin tác giả</h4>
+                    <div class="d-flex align-items-center">
+                        <img class="rounded-circle me-3" src="/img/team-1.jpg" alt="" style="width: 60px; height: 60px;">
+                        <div>
+                            <h5 class="mb-0">{{post.author.firstName}} {{post.author.lastName}}</h5>
+                            <small>Giảng viên tại EnglishMaster</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

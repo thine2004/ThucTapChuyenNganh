@@ -1,72 +1,75 @@
+<!-- Service Start -->
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="row g-4">
+            {{#each site.features}}
+            <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.1s">
+                <div class="service-item text-center pt-3">
+                    <div class="p-4">
+                        <i class="fa fa-3x {{this.icon}} text-primary mb-4"></i>
+                        <h5 class="mb-3">{{this.title}}</h5>
+                        <p>{{this.description}}</p>
+                    </div>
+                </div>
+            </div>
+            {{/each}}
+        </div>
+    </div>
+</div>
+<!-- Service End -->
 
+<!-- About Start -->
 <div class="container-xxl py-5">
     <div class="container">
         <div class="row g-5">
             <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.1s" style="min-height: 400px;">
                 <div class="position-relative h-100">
-                    <img class="img-fluid position-absolute w-100 h-100" src="/img/about.jpg" alt="Về EnglishMaster" style="object-fit: cover;">
+                    <img class="img-fluid position-absolute w-100 h-100" src="{{site.aboutImage}}" alt="{{site.aboutTitle}}" style="object-fit: cover;">
                 </div>
             </div>
             <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.3s">
                 <h6 class="section-title bg-white text-start text-primary pe-3">Về Chúng Tôi</h6>
-                <h1 class="mb-4">Chào mừng đến với EnglishMaster</h1>
-                <p class="mb-4">EnglishMaster là trung tâm luyện thi tiếng Anh hàng đầu Việt Nam, chuyên sâu về các khóa học TOEIC, IELTS và TOEFL.</p>
-                <p class="mb-4">Với hơn 10 năm kinh nghiệm, chúng tôi đã giúp hàng ngàn học viên đạt được điểm số mơ ước và mở ra cánh cửa cơ hội quốc tế.</p>
+                <h1 class="mb-4">{{site.aboutTitle}}</h1>
+                <p class="mb-4">{{site.aboutDescription}}</p>
                 <div class="row gy-2 gx-4 mb-4">
+                    {{#each site.aboutPoints}}
                     <div class="col-sm-6">
-                        <p class="mb-0"><i class="fa fa-arrow-right text-primary me-2"></i>Giáo viên bản ngữ chất lượng</p>
+                        <p class="mb-0"><i class="fa fa-arrow-right text-primary me-2"></i>{{this}}</p>
                     </div>
-                    <div class="col-sm-6">
-                        <p class="mb-0"><i class="fa fa-arrow-right text-primary me-2"></i>Lớp học online linh hoạt</p>
-                    </div>
-                    <div class="col-sm-6">
-                        <p class="mb-0"><i class="fa fa-arrow-right text-primary me-2"></i>Cam kết tăng điểm</p>
-                    </div>
-                    <div class="col-sm-6">
-                        <p class="mb-0"><i class="fa fa-arrow-right text-primary me-2"></i>Lộ trình học cá nhân hóa</p>
-                    </div>
-                    <div class="col-sm-6">
-                        <p class="mb-0"><i class="fa fa-arrow-right text-primary me-2"></i>Tài liệu cập nhật mới nhất</p>
-                    </div>
-                    <div class="col-sm-6">
-                        <p class="mb-0"><i class="fa fa-arrow-right text-primary me-2"></i>Học thử miễn phí</p>
-                    </div>
+                    {{/each}}
                 </div>
                 <a class="btn btn-primary py-3 px-5 mt-2" href="/about">Tìm Hiểu Thêm</a>
             </div>
         </div>
     </div>
 </div>
-<div class="container-xxl py-5 category">
+<!-- About End -->
+
+<!-- Stats Start -->
+<div class="container-xxl py-5 pt-0">
     <div class="container">
-        <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
-            <h6 class="section-title bg-white text-center text-primary px-3">Các Loại Bài Thi</h6>
-            <h1 class="mb-5">Bài Thi Tiếng Anh Phổ Biến</h1>
-        </div>
-        <div class="row g-3">
-            <div class="col-lg-7 col-md-6">
-                <div class="row g-3">
-                    {{#each categories}}
-                    <div class="col-lg-6 col-md-12 wow zoomIn" data-wow-delay="0.1s">
-                        <a class="position-relative d-block overflow-hidden" href="/courses?category={{this._id}}">
-                            <img class="img-fluid" src="/img/cat-1.jpg" alt="{{this.name}}"> <!-- Placeholder img, maybe use category image if avail -->
-                            <div class="bg-white text-center position-absolute bottom-0 end-0 py-2 px-3" style="margin: 1px;">
-                                <h5 class="m-0">{{this.name}}</h5>
-                                <small class="text-primary">{{this.description}}</small>
-                            </div>
-                        </a>
+        <div class="row g-4">
+            {{#each site.stats}}
+            <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.1s">
+                <div class="service-item text-center pt-3 shadow-sm border rounded">
+                    <div class="p-4">
+                        <h2 class="text-primary mb-1" data-toggle="counter-up">{{this.value}}</h2>
+                        <p class="mb-0 text-uppercase fw-bold small text-muted">{{this.label}}</p>
                     </div>
-                    {{/each}}
                 </div>
             </div>
+            {{/each}}
         </div>
     </div>
 </div>
+<!-- Stats End -->
+
+<!-- Courses Start -->
 <div class="container-xxl py-5">
     <div class="container">
         <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
-            <h6 class="section-title bg-white text-center text-primary px-3">Khóa Học</h6>
-            <h1 class="mb-5">Khóa Học Tiếng Anh Phổ Biến</h1>
+            <h6 class="section-title bg-white text-center text-primary px-3">{{site.coursesSubtitle}}</h6>
+            <h1 class="mb-5">{{site.coursesTitle}}</h1>
         </div>
         <div class="row g-4 justify-content-center">
             {{#each popularCourses}}
@@ -75,14 +78,12 @@
                     <div class="position-relative overflow-hidden">
                         <img class="img-fluid" src="{{this.thumbnail}}" alt="{{this.title}}">
                         
-                        {{!-- Status Badge --}}
                         {{#if_eq this.status 'sold_out'}}
                         <div class="bg-warning text-dark position-absolute top-0 start-0 m-3 py-1 px-2">
                             <small><strong>HẾT KHÓA</strong></small>
                         </div>
                         {{/if_eq}}
                         
-                        {{!-- Discount Badge --}}
                         {{#if this.originalPrice}}
                         <div class="bg-danger text-white position-absolute top-0 end-0 m-3 py-1 px-2">
                             <small>GIẢM GIÁ</small>
@@ -90,11 +91,16 @@
                         {{/if}}
 
                         <div class="w-100 d-flex justify-content-center position-absolute bottom-0 start-0 mb-4">
-                            <a href="/courses/{{this._id}}" class="flex-shrink-0 btn btn-sm btn-primary px-3 border-end" style="border-radius: 30px 0 0 30px;">Chi Tiết</a>
                             {{#if_eq this.status 'available'}}
-                            <a href="/cart/add/{{this._id}}" class="flex-shrink-0 btn btn-sm btn-primary px-3" style="border-radius: 0 30px 30px 0;">Đăng Ký</a>
+                            <form action="/courses/{{this._id}}/enroll" method="POST" class="m-0 p-0">
+                                <button type="submit" class="btn btn-primary px-4 shadow-sm" style="border-radius: 30px;">
+                                    <i class="fa fa-shopping-cart me-2"></i>Đăng Ký Ngay
+                                </button>
+                            </form>
                             {{else}}
-                            <button class="flex-shrink-0 btn btn-sm btn-secondary px-3" style="border-radius: 0 30px 30px 0;" disabled>Hết Chỗ</button>
+                            <button class="btn btn-secondary px-4 shadow-sm" style="border-radius: 30px;" disabled>
+                                <i class="fa fa-ban me-2"></i>Hết Chỗ
+                            </button>
                             {{/if_eq}}
                         </div>
                     </div>
@@ -128,18 +134,21 @@
         </div>
     </div>
 </div>
+<!-- Courses End -->
+
+<!-- Instructors Start -->
 <div class="container-xxl py-5">
     <div class="container">
         <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
-            <h6 class="section-title bg-white text-center text-primary px-3">Giảng Viên</h6>
-            <h1 class="mb-5">Đội Ngũ Giáo Viên Chuyên Nghiệp</h1>
+            <h6 class="section-title bg-white text-center text-primary px-3">{{site.teamSubtitle}}</h6>
+            <h1 class="mb-5">{{site.teamTitle}}</h1>
         </div>
         <div class="row g-4">
             {{#each instructors}}
             <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
                 <div class="team-item bg-light">
                     <div class="overflow-hidden">
-                        <img class="img-fluid" src="/img/team-1.jpg" alt="Giáo viên {{this.firstName}}">
+                        <img class="img-fluid" src="{{#if this.avatar}}{{this.avatar}}{{else}}/img/team-1.jpg{{/if}}" alt="Giáo viên {{this.firstName}}">
                     </div>
                     <div class="position-relative d-flex justify-content-center" style="margin-top: -23px;">
                         <div class="bg-light d-flex justify-content-center pt-2 px-1">
@@ -162,16 +171,52 @@
         </div>
     </div>
 </div>
+<!-- Instructors End -->
+
+<!-- Blog Start -->
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+            <h6 class="section-title bg-white text-center text-primary px-3">{{site.blogSubtitle}}</h6>
+            <h1 class="mb-5">{{site.blogTitle}}</h1>
+        </div>
+        <div class="row g-4">
+            {{#each posts}}
+            <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                <div class="blog-item bg-light overflow-hidden shadow-sm">
+                    <img class="img-fluid w-100" src="{{this.thumbnail}}" alt="" style="height: 200px; object-fit: cover;">
+                    <div class="p-4">
+                        <div class="d-flex mb-3">
+                            <small class="me-3"><i class="fa fa-user text-primary me-2"></i>{{this.author.firstName}}</small>
+                            <small><i class="fa fa-calendar-alt text-primary me-2"></i>{{formatDate this.createdAt}}</small>
+                        </div>
+                        <h5 class="mb-3">{{this.title}}</h5>
+                        <p>{{truncate this.content 80}}</p>
+                        <a class="text-uppercase fw-bold small" href="/blog/{{this.slug}}">Xem Thêm <i class="fa fa-arrow-right ms-2"></i></a>
+                    </div>
+                </div>
+            </div>
+            {{else}}
+            <div class="col-12 text-center text-muted">
+                <p>Đang cập nhật các bài viết chia sẻ kinh nghiệm học tập...</p>
+            </div>
+            {{/each}}
+        </div>
+    </div>
+</div>
+<!-- Blog End -->
+
+<!-- Testimonials Start -->
 <div class="container-xxl py-5 wow fadeInUp" data-wow-delay="0.1s">
     <div class="container">
         <div class="text-center">
-            <h6 class="section-title bg-white text-center text-primary px-3">Đánh Giá</h6>
-            <h1 class="mb-5">Học Viên Nói Gì Về Chúng Tôi!</h1>
+            <h6 class="section-title bg-white text-center text-primary px-3">{{site.testimonialSubtitle}}</h6>
+            <h1 class="mb-5">{{site.testimonialTitle}}</h1>
         </div>
         <div class="owl-carousel testimonial-carousel position-relative">
             {{#each testimonials}}
             <div class="testimonial-item text-center">
-                <img class="border rounded-circle p-2 mx-auto mb-3" src="/img/testimonial-1.jpg" style="width: 80px; height: 80px;" alt="Học viên {{this.user.firstName}}">
+                <img class="border rounded-circle p-2 mx-auto mb-3" src="{{#if this.user.avatar}}{{this.user.avatar}}{{else}}/img/testimonial-1.jpg{{/if}}" style="width: 80px; height: 80px;" alt="Học viên {{this.user.firstName}}">
                 <h5 class="mb-0">{{this.user.firstName}} {{this.user.lastName}}</h5>
                 <p>Học viên xuất sắc</p>
                 <div class="testimonial-text bg-light text-center p-4">
@@ -186,3 +231,4 @@
         </div>
     </div>
 </div>
+<!-- Testimonials End -->

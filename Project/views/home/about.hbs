@@ -2,42 +2,17 @@
 <div class="container-xxl py-5">
     <div class="container">
         <div class="row g-4">
+            {{#each site.features}}
             <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.1s">
                 <div class="service-item text-center pt-3">
                     <div class="p-4">
-                        <i class="fa fa-3x fa-graduation-cap text-primary mb-4"></i>
-                        <h5 class="mb-3">Giáo Viên Bản Ngữ</h5>
-                        <p>Đội ngũ giáo viên bản ngữ giàu kinh nghiệm luyện thi với chứng chỉ quốc tế và phương pháp giảng dạy hiệu quả</p>
+                        <i class="fa fa-3x {{this.icon}} text-primary mb-4"></i>
+                        <h5 class="mb-3">{{this.title}}</h5>
+                        <p>{{this.description}}</p>
                     </div>
                 </div>
             </div>
-            <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.3s">
-                <div class="service-item text-center pt-3">
-                    <div class="p-4">
-                        <i class="fa fa-3x fa-globe text-primary mb-4"></i>
-                        <h5 class="mb-3">Học Linh Hoạt</h5>
-                        <p>Lớp học online và offline được thiết kế linh hoạt phù hợp với lịch trình và phong cách học tập của bạn</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.5s">
-                <div class="service-item text-center pt-3">
-                    <div class="p-4">
-                        <i class="fa fa-3x fa-award text-primary mb-4"></i>
-                        <h5 class="mb-3">Cam Kết Đầu Ra</h5>
-                        <p>Chúng tôi cam kết bạn sẽ đạt được điểm số mục tiêu TOEIC, IELTS hoặc TOEFL - học lại miễn phí nếu không đạt</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.7s">
-                <div class="service-item text-center pt-3">
-                    <div class="p-4">
-                        <i class="fa fa-3x fa-book-open text-primary mb-4"></i>
-                        <h5 class="mb-3">Tài Liệu Cập Nhật</h5>
-                        <p>Tài liệu học tập và đề thi thử toàn diện, được cập nhật liên tục cho mọi trình độ và kỳ thi</p>
-                    </div>
-                </div>
-            </div>
+            {{/each}}
         </div>
     </div>
 </div>
@@ -49,33 +24,19 @@
         <div class="row g-5">
             <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.1s" style="min-height: 400px;">
                 <div class="position-relative h-100">
-                    <img class="img-fluid position-absolute w-100 h-100" src="/img/about.jpg" alt="Về EnglishMaster - Trung tâm luyện thi tiếng Anh" style="object-fit: cover;">
+                    <img class="img-fluid position-absolute w-100 h-100" src="{{site.aboutImage}}" alt="{{site.aboutTitle}}" style="object-fit: cover;">
                 </div>
             </div>
             <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.3s">
                 <h6 class="section-title bg-white text-start text-primary pe-3">Về Chúng Tôi</h6>
-                <h1 class="mb-4">Chào Mừng Đến Với EnglishMaster</h1>
-                <p class="mb-4">EnglishMaster là trung tâm luyện thi tiếng Anh hàng đầu Việt Nam, chuyên sâu về các khóa học toàn diện cho kỳ thi TOEIC, IELTS và TOEFL.</p>
-                <p class="mb-4">Với hơn một thập kỷ kinh nghiệm, chúng tôi đã thành công hướng dẫn hàng ngàn học viên đạt được điểm số mong muốn, mở ra cánh cửa cho các cơ hội giáo dục và sự nghiệp quốc tế.</p>
+                <h1 class="mb-4">{{site.aboutTitle}}</h1>
+                <p class="mb-4">{{site.aboutDescription}}</p>
                 <div class="row gy-2 gx-4 mb-4">
+                    {{#each site.aboutPoints}}
                     <div class="col-sm-6">
-                        <p class="mb-0"><i class="fa fa-arrow-right text-primary me-2"></i>Giáo viên bản ngữ chất lượng</p>
+                        <p class="mb-0"><i class="fa fa-arrow-right text-primary me-2"></i>{{this}}</p>
                     </div>
-                    <div class="col-sm-6">
-                        <p class="mb-0"><i class="fa fa-arrow-right text-primary me-2"></i>Lớp học online linh hoạt</p>
-                    </div>
-                    <div class="col-sm-6">
-                        <p class="mb-0"><i class="fa fa-arrow-right text-primary me-2"></i>Cam kết cải thiện điểm số</p>
-                    </div>
-                    <div class="col-sm-6">
-                        <p class="mb-0"><i class="fa fa-arrow-right text-primary me-2"></i>Lộ trình học cá nhân hóa</p>
-                    </div>
-                    <div class="col-sm-6">
-                        <p class="mb-0"><i class="fa fa-arrow-right text-primary me-2"></i>Tài liệu thi cập nhật mới nhất</p>
-                    </div>
-                    <div class="col-sm-6">
-                        <p class="mb-0"><i class="fa fa-arrow-right text-primary me-2"></i>Học thử miễn phí</p>
-                    </div>
+                    {{/each}}
                 </div>
                 <a class="btn btn-primary py-3 px-5 mt-2" href="/courses">Xem Khóa Học Của Chúng Tôi</a>
             </div>
@@ -88,15 +49,15 @@
 <div class="container-xxl py-5">
     <div class="container">
         <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
-            <h6 class="section-title bg-white text-center text-primary px-3">Đội Ngũ Của Chúng Tôi</h6>
-            <h1 class="mb-5">Gặp Gỡ Các Giảng Viên Chuyên Nghiệp</h1>
+            <h6 class="section-title bg-white text-center text-primary px-3">{{site.teamSubtitle}}</h6>
+            <h1 class="mb-5">{{site.teamTitle}}</h1>
         </div>
         <div class="row g-4">
             {{#each instructors}}
             <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
                 <div class="team-item bg-light">
                     <div class="overflow-hidden">
-                        <img class="img-fluid" src="/img/team-1.jpg" alt="Giáo viên {{this.firstName}}">
+                        <img class="img-fluid" src="{{#if this.avatar}}{{this.avatar}}{{else}}/img/team-1.jpg{{/if}}" alt="Giáo viên {{this.firstName}}">
                     </div>
                     <div class="position-relative d-flex justify-content-center" style="margin-top: -23px;">
                         <div class="bg-light d-flex justify-content-center pt-2 px-1">
@@ -119,4 +80,5 @@
         </div>
     </div>
 </div>
+<!-- Team End -->
 <!-- Team End -->

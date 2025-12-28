@@ -87,12 +87,19 @@
                         {{/if}}
                     </td>
                     <td>
-                        <a href="/admin/product/edit/{{this._id}}" class="btn btn-sm btn-warning">
-                            <i class="fa fa-edit"></i> Sửa
+                        <a href="/admin/product/edit/{{this._id}}" class="btn btn-sm btn-warning" title="Sửa">
+                            <i class="fa fa-edit"></i>
                         </a>
-                        <button class="btn btn-sm btn-danger">
-                            <i class="fa fa-trash"></i> Xóa
-                        </button>
+                        <form action="/admin/product/toggle/{{this._id}}" method="POST" style="display:inline;">
+                            <button type="submit" class="btn btn-sm {{#if this.isActive}}btn-primary{{else}}btn-secondary{{/if}}" title="{{#if this.isActive}}Ẩn khóa học{{else}}Hiện khóa học{{/if}}">
+                                <i class="fa {{#if this.isActive}}fa-eye{{else}}fa-eye-slash{{/if}}"></i>
+                            </button>
+                        </form>
+                        <form action="/admin/product/delete/{{this._id}}?_method=DELETE" method="POST" style="display:inline;" onsubmit="return confirm('Bạn có chắc muốn xóa khóa học này?')">
+                            <button type="submit" class="btn btn-sm btn-danger" title="Xóa">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </form>
                     </td>
                 </tr>
                 {{else}}

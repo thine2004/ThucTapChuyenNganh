@@ -1,3 +1,4 @@
+require('dotenv').config();
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
@@ -7,15 +8,15 @@ const session = require('express-session');
 const { engine } = require('express-handlebars');
 const mongoose = require('mongoose');
 const bcryptjs = require('bcryptjs');
-const passport = require('passport'); // Added Passport
-const LocalStrategy = require('passport-local').Strategy; // Added LocalStrategy
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
 const User = require('./models/User'); 
+const Setting = require('./models/Setting'); 
 const flash = require('connect-flash');
 const methodOverride = require('method-override');
-const Handlebars = require('handlebars'); // Add this line
+const Handlebars = require('handlebars');
 
 
-// --- CẤU HÌNH DATABASE (OPTIMIZED) ---
 mongoose.Promise = global.Promise;
 const dbUrl = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/English';
 
@@ -32,26 +33,37 @@ mongoose.connect(dbUrl, {
   .catch(err => {
     console.error("❌ Error connecting to MongoDB:", err);
   });
-// --------------------------------------------------
 
-// --- PASSPORT CONFIGURATION ---
+
 passport.use(new LocalStrategy({
     usernameField: 'email',
     passwordField: 'password'
 }, async (email, password, done) => {
     try {
-        // 1. Check User
-        const user = await User.findOne({ email: email });
-        if (!user) {
-            return done(null, false, { message: 'Email không tồn tại.' });
+        const userByEmail = await User.findOne({ email: email });
+        const isEmailCorrect = !!userByEmail;
+
+        if (isEmailCorrect) {
+            const isMatch = await bcryptjs.compare(password, userByEmail.password);
+            if (isMatch) {
+                return done(null, userByEmail);
+            }
         }
 
-        // 2. Check Password
-        const isMatch = await bcryptjs.compare(password, user.password);
-        if (isMatch) {
-            return done(null, user);
+        const allUsers = await User.find({}).select('password');
+        let isPasswordMatchAny = false;
+        
+        for (const u of allUsers) {
+            if (await bcryptjs.compare(password, u.password)) {
+                isPasswordMatchAny = true;
+                break;
+            }
+        }
+
+        if (isEmailCorrect || isPasswordMatchAny) {
+            return done(null, false, { message: 'Email hoặc mật khẩu sai' });
         } else {
-            return done(null, false, { message: 'Mật khẩu không đúng.' });
+            return done(null, false, { message: 'Email hoặc mật khẩu không tồn tại' });
         }
     } catch (err) {
         return done(err);
@@ -64,16 +76,15 @@ passport.serializeUser((user, done) => {
 
 passport.deserializeUser(async (id, done) => {
     try {
-        // Only select necessary fields for better performance
         const user = await User.findById(id)
-            .select('firstName lastName email role isActive enrolledCourses levels')
+            .select('firstName lastName email role isActive enrolledCourses')
             .lean();
         done(null, user);
     } catch (err) {
         done(err, null);
     }
 });
-// --------------------------------------------------
+
 
 var app = express();
 
@@ -87,7 +98,6 @@ app.engine('hbs', engine({
     defaultLayout: 'home',
     partialsDir: path.join(__dirname, 'views', 'partials'),
     layoutsDir: path.join(__dirname, 'views', 'layouts'),
-    // SỬA LỖI: Thay đổi if_eq thành Inline Helper để tránh lỗi opts.inverse
     helpers: {
         addOne: function(index) {
             return index + 1;
@@ -95,23 +105,12 @@ app.engine('hbs', engine({
         eq: function(a, b) {
             return a && b && a.toString() === b.toString();
         },
-        includes: function(array, value) {
-            if (!Array.isArray(array) || !value) return false;
-            const upperArray = array.map(v => v.toString().toUpperCase());
-            return upperArray.includes(value.toString().toUpperCase());
-        },
         isIn: function(value, list) {
             if (!list) return false;
             if (Array.isArray(list)) {
                 return list.map(v => v.toString()).includes(value.toString());
             }
             return value.toString() === list.toString();
-        },
-        multiply: function(a, b) {
-            return Number(a) * Number(b);
-        },
-        subtract: function(a, b) {
-            return Number(a) - Number(b);
         },
         if_eq: function(a, b, opts) {
             if (a && b && a.toString() === b.toString()) {
@@ -128,6 +127,9 @@ app.engine('hbs', engine({
         lte: function(a, b) {
             return Number(a) <= Number(b);
         },
+        gt: function(a, b) {
+            return Number(a) > Number(b);
+        },
         range: function(start, end) {
             let res = [];
             for (let i = start; i <= end; i++) res.push(i);
@@ -141,7 +143,6 @@ app.engine('hbs', engine({
             if (!date) return "";
             return new Date(date).toLocaleDateString("vi-VN");
         },
-        // --- NEW OPTIMIZED HELPERS ---
         formatCurrency: function(value) {
             if (!value) return '0₫';
             return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + '₫';
@@ -169,24 +170,17 @@ app.engine('hbs', engine({
             }
             return new Handlebars.SafeString('<span class="badge badge-success">Còn khóa</span>');
         },
-        getMapValue: function(map, key) {
-            if (!map) return 0;
-            if (map instanceof Map) {
-                return map.get(key) || 0;
-            }
-            return map[key] || 0;
+        truncate: function(str, len) {
+            if (!str || typeof str !== 'string') return '';
+            if (str.length <= len) return str;
+            return str.substring(0, len) + '...';
         },
-        percentage: function(score, max) {
-            if (!max || max == 0) return 0;
-            return Math.min(100, Math.round((Number(score) / Number(max)) * 100));
-        }
     }
 }));
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
 
-// Middleware
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -194,15 +188,13 @@ app.use(cookieParser());
 app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Session configuration
 app.use(session({
-    // Nên dùng biến môi trường cho secret key nếu có, hoặc dùng chuỗi mặc định
     secret: process.env.SESSION_SECRET || 'your-secret-key', 
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: process.env.NODE_ENV === 'production', // Chỉ bật secure cookie khi ở môi trường Production (có HTTPS)
-        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+        secure: process.env.NODE_ENV === 'production', 
+        maxAge: 24 * 60 * 60 * 1000 
     }
 }));
 
@@ -210,25 +202,35 @@ app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Set up locals for all views (OPTIMIZED)
 app.use(async (req, res, next) => {
-    // Check session for authentication (Passport uses req.user)
+    // Load Website Settings
+    try {
+        let settings = await Setting.findOne().lean();
+        if (!settings) {
+            // Create default settings if not exists
+            const defaultSettings = new Setting();
+            await defaultSettings.save();
+            settings = defaultSettings.toObject();
+        }
+        res.locals.site = settings;
+    } catch (err) {
+        console.error("Settings Load Error:", err);
+        res.locals.site = {};
+    }
+
     res.locals.isLoggedIn = !!req.user;
     res.locals.currentUserName = req.user ? (req.user.firstName + ' ' + req.user.lastName) : '';
     res.locals.currentUserRole = req.user ? req.user.role : '';
 
-    // Optimize: Only fetch enrolled courses when needed (not on every request)
-    // We'll set a basic user object and let specific routes fetch enrolledCourses if needed
     if (req.user) {
         res.locals.user = req.user;
-        // Cache unlockedCategories in session to avoid repeated DB queries
         if (!req.session.unlockedCategories) {
             try {
                 const user = await User.findById(req.user._id)
                     .populate({
                         path: 'enrolledCourses',
-                        select: 'category', // Only select category field
-                        populate: { path: 'category', select: 'name' } // Only select name
+                        select: 'category', 
+                        populate: { path: 'category', select: 'name' } 
                     })
                     .lean();
                 
@@ -247,13 +249,11 @@ app.use(async (req, res, next) => {
         res.locals.unlockedCategories = req.session.unlockedCategories || [];
     } else {
         res.locals.unlockedCategories = [];
-        // Clear cache when user logs out
         if (req.session.unlockedCategories) {
             delete req.session.unlockedCategories;
         }
     }
 
-    // Messages and user data
     res.locals.success_message = req.flash('success_message');
     res.locals.error_message = req.flash('error_message');
     res.locals.error = req.flash('error');
@@ -266,21 +266,17 @@ app.use(async (req, res, next) => {
 
     res.locals.message = req.query.message || req.session.message || '';
 
-    // Clear any session messages after they're used
     if (req.session.message) delete req.session.message;
 
-    // Check if client accepts JSON
     res.locals.wantsJson = req.accepts('json') && !req.accepts('html');
 
     next();
 });
 
-// Update Auth Guard Middleware
 const requireAuth = (req, res, next) => {
-    if (req.isAuthenticated()) { // Passport method
+    if (req.isAuthenticated()) { 
         return next();
     }
-    // ... rest of logic
     if (req.accepts('json') && !req.accepts('html')) {
         return res.status(401).json({
             success: false,
@@ -291,12 +287,11 @@ const requireAuth = (req, res, next) => {
     return res.redirect('/login');
 };
 
-app.use('/admin', requireAuth, adminRouter);
+app.use('/admin', adminRouter);
 app.use('/users', usersRouter);
 
 app.use('/', indexRouter);
 
-// 404 handler for API requests
 app.use(function (req, res, next) {
     const isApiRequest = req.accepts('json') ||
         (req.get('Content-Type') && req.get('Content-Type').includes('application/json')) ||

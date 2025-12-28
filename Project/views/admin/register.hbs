@@ -1,0 +1,59 @@
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-lg">
+                <div class="card-header bg-dark text-white p-4 text-center">
+                    <h3 class="mb-0">Admin Registration</h3>
+                </div>
+                <div class="card-body p-4">
+                    {{#if errors}}
+                        <div class="alert alert-danger">
+                            {{#each errors}}
+                                <p class="mb-0">{{this}}</p>
+                            {{/each}}
+                        </div>
+                    {{/if}}
+                    
+                    {{#if success_message}}
+                        <div class="alert alert-success">{{success_message}}</div>
+                    {{/if}}
+                    
+                    {{#if error_message}}
+                        <div class="alert alert-danger">{{error_message}}</div>
+                    {{/if}}
+
+                    <form action="/admin/register" method="POST">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="firstName" class="form-label font-weight-bold">First Name</label>
+                                <input type="text" name="firstName" id="firstName" class="form-control border-0 bg-light" value="{{firstName}}">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="lastName" class="form-label font-weight-bold">Last Name</label>
+                                <input type="text" name="lastName" id="lastName" class="form-control border-0 bg-light" value="{{lastName}}">
+                            </div>
+                        </div>
+                    
+                        <div class="mb-3">
+                            <label for="email" class="form-label font-weight-bold">Email</label>
+                            <input type="email" name="email" id="email" class="form-control border-0 bg-light" value="{{email}}">
+                        </div>
+                    
+                        <div class="mb-3">
+                            <label for="password" class="form-label font-weight-bold">Password</label>
+                            <input type="password" name="password" id="password" class="form-control border-0 bg-light">
+                        </div>
+
+
+                    
+                        <button type="submit" class="btn btn-dark w-100 py-2 shadow-sm">Register Admin</button>
+                    </form>
+                    
+                    <div class="mt-4 text-center">
+                        <p class="text-muted small">Already have an admin account? <a href="/admin/login" class="text-dark font-weight-bold">Login here</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

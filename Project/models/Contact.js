@@ -11,6 +11,10 @@ const ContactSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    },
     phone: String,
     course: String,
     level: String,

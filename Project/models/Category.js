@@ -11,7 +11,6 @@ const CategorySchema = new mongoose.Schema({
         type: String,
         trim: true
     },
-    // Slug để tạo đường dẫn thân thiện (ví dụ: /category/luyen-thi-toeic)
     slug: {
         type: String,
         lowercase: true,
@@ -21,23 +20,14 @@ const CategorySchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
-    isExam: {
-        type: Boolean,
-        default: false
-    },
-    maxScore: {
-        type: Number,
-        default: 100
-    }
+
 }, {
     timestamps: true
 });
 
-// Helper function to create slug (handles Vietnamese characters)
 function slugify(text) {
     let str = text.toString().toLowerCase();
     
-    // Replace Vietnamese characters
     str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
     str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
     str = str.replace(/ì|í|ị|ỉ|ĩ/g, "i");
@@ -47,14 +37,13 @@ function slugify(text) {
     str = str.replace(/đ/g, "d");
     
     return str
-        .replace(/\s+/g, '-')           // Replace spaces with -
-        .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
-        .replace(/\-\-+/g, '-')         // Replace multiple - with single -
-        .replace(/^-+/, '')             // Trim - from start of text
-        .replace(/-+$/, '');            // Trim - from end of text
+        .replace(/\s+/g, '-')           
+        .replace(/[^\w\-]+/g, '')       
+        .replace(/\-\-+/g, '-')         
+        .replace(/^-+/, '')             
+        .replace(/-+$/, '');            
 }
 
-// Pre-save hook to generate slug
 CategorySchema.pre('save', function() {
     if (this.isModified('name') || !this.slug) {
         this.slug = slugify(this.name);

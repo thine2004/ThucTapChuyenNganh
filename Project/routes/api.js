@@ -4,7 +4,6 @@ const User = require('../models/User');
 const Course = require('../models/Course');
 const Category = require('../models/Category');
 
-
 router.get('/test', (req, res) => {
     res.json({
         success: true,
@@ -35,7 +34,6 @@ router.get('/users', async (req, res) => {
     }
 });
 
-// GET /api/users/:id - Lấy thông tin user theo ID
 router.get('/users/:id', async (req, res) => {
     try {
         const user = await User.findById(req.params.id).select('-password');
@@ -59,7 +57,6 @@ router.get('/users/:id', async (req, res) => {
     }
 });
 
-// GET /api/courses - Lấy danh sách tất cả khóa học
 router.get('/courses', async (req, res) => {
     try {
         const courses = await Course.find()
@@ -82,7 +79,6 @@ router.get('/courses', async (req, res) => {
     }
 });
 
-// GET /api/courses/:id - Lấy thông tin khóa học theo ID
 router.get('/courses/:id', async (req, res) => {
     try {
         const course = await Course.findById(req.params.id)
@@ -128,12 +124,10 @@ router.get('/categories', async (req, res) => {
     }
 });
 
-// POST /api/users - Tạo user mới (ví dụ)
 router.post('/users', async (req, res) => {
     try {
         const { name, email, password, phone, role } = req.body;
         
-        // Kiểm tra dữ liệu đầu vào
         if (!name || !email || !password || !role) {
             return res.status(400).json({
                 success: false,
@@ -141,7 +135,6 @@ router.post('/users', async (req, res) => {
             });
         }
 
-        // Kiểm tra email đã tồn tại chưa
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.status(400).json({
@@ -150,11 +143,10 @@ router.post('/users', async (req, res) => {
             });
         }
 
-        // Tạo user mới (lưu ý: trong thực tế cần hash password)
         const newUser = new User({
             name,
             email,
-            password, // Nên hash password trước khi lưu
+            password, 
             phone,
             role
         });
@@ -180,7 +172,6 @@ router.post('/users', async (req, res) => {
     }
 });
 
-// POST /api/test - Test POST request
 router.post('/test', (req, res) => {
     res.json({
         success: true,
@@ -191,4 +182,3 @@ router.post('/test', (req, res) => {
 });
 
 module.exports = router;
-

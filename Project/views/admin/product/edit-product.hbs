@@ -5,7 +5,7 @@
 
 <div class="card shadow mb-4">
     <div class="card-body">
-        <form action="/admin/product/edit/{{product._id}}?_method=PUT" method="POST">
+        <form action="/admin/product/edit/{{product._id}}?_method=PUT" method="POST" enctype="multipart/form-data">
             <div class="form-group">
                 <label for="title">Tên Khóa học</label>
                 <input type="text" class="form-control" id="title" name="title" value="{{product.title}}" required>
@@ -37,7 +37,9 @@
             </div>
 
             <div class="form-group">
-                <label for="thumbnail">Link Ảnh bìa</label>
+                <label for="thumbnailFile">Ảnh bìa (Tải lên)</label>
+                <input type="file" class="form-control-file mb-2" id="thumbnailFile" name="thumbnailFile">
+                <label for="thumbnail" class="small text-muted">Hoặc nhập Link Ảnh</label>
                 <input type="text" class="form-control" id="thumbnail" name="thumbnail" value="{{product.thumbnail}}" placeholder="/img/default.jpg">
             </div>
 
@@ -78,12 +80,6 @@
                         <option value="available">Còn khóa</option>
                         <option value="sold_out">Hết khóa</option>
                     </select>
-                </div>
-                <div class="form-group col-md-6">
-                    <div class="custom-control custom-checkbox" style="margin-top: 38px;">
-                        <input type="checkbox" class="custom-control-input" id="isActive" name="isActive" value="true" {{#if product.isActive}}checked{{/if}}>
-                        <label class="custom-control-label" for="isActive">Hoạt động</label>
-                    </div>
                 </div>
             </div>
 

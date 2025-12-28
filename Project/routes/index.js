@@ -4,38 +4,59 @@ const User = require('../models/User');
 const bcryptjs = require('bcryptjs');
 const Course = require('../models/Course');
 const Category = require('../models/Category');
-const Order = require('../models/Order');
+
 const Contact = require('../models/Contact');
 const Review = require('../models/Review');
-const PracticeTest = require('../models/PracticeTest');
-const TestResult = require('../models/TestResult');
-const Resource = require('../models/Resource');
-const Question = require('../models/Question');
-const Lesson = require('../models/Lesson');
+const Post = require('../models/Post');
 
-// Middleware removed (query based login params)
 
 router.all('/*', function(req, res, next) {
     res.locals.layout = 'home';
     next();
 });
 
-
-
-const passport = require('passport'); // Add require if not present, but usually in app.js is enough if configured there. 
-// Wait, router uses passport.authenticate middleware, so we probably need to require passport here too to use 'passport.authenticate' function.
-// Actually, passport instance is required.
+const passport = require('passport'); 
 
 router.post('/login', (req, res, next) => {
-    passport.authenticate('local', {
-        successRedirect: '/login/success-handler', // Redirect to intermediate handler or check role
-        failureRedirect: '/login',
-        failureFlash: true,
-        successFlash: 'Đăng nhập thành công!'
+    const { email, password } = req.body;
+
+    if (!email && !password) {
+        req.flash('error_message', 'Vui lòng nhập email và mật khẩu');
+        return res.redirect('/login');
+    } else if (!email) {
+        req.flash('error_message', 'Vui lòng nhập email');
+        return res.redirect('/login');
+    } else if (!password) {
+        req.flash('error_message', 'Vui lòng nhập mật khẩu');
+        return res.redirect('/login');
+    } else if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
+        req.flash('error_message', 'Email sai định dạng');
+        return res.redirect('/login');
+    }
+
+    passport.authenticate('local', (err, user, info) => {
+        if (err) return next(err);
+        if (!user) {
+            req.flash('error_message', info.message || 'Đăng nhập thất bại');
+            return res.redirect('/login');
+        }
+
+        // Only allow 'user' role on this page
+        if (user.role === 'admin') {
+            req.flash('error_message', 'Tài khoản Admin vui lòng đăng nhập tại trang quản trị.');
+            return res.redirect('/login');
+        }
+
+        req.logIn(user, (err) => {
+            if (err) return next(err);
+            req.flash('success_message', 'Đăng nhập thành công!');
+            const returnTo = req.session.returnTo || '/';
+            delete req.session.returnTo;
+            res.redirect(returnTo);
+        });
     })(req, res, next);
 });
 
-// Intermediate handler to check role after passport success
 router.get('/login/success-handler', (req, res) => {
     if (req.user.role === 'admin') {
         res.redirect('/admin');
@@ -50,10 +71,47 @@ router.post('/register', async (req, res, next) => {
     let errors = [];
     const { firstName, lastName, email, password } = req.body;
 
-    if (!firstName) errors.push('Vui lòng nhập Tên (First Name)');
-    if (!lastName) errors.push('Vui lòng nhập Họ (Last Name)');
-    if (!email) errors.push('Vui lòng nhập Email');
-    if (!password) errors.push('Vui lòng nhập Mật khẩu');
+    if (!firstName && !lastName && !email && !password) {
+        errors.push('Vui lòng nhập đầy đủ thông tin');
+    } else {
+        if (!firstName || firstName.trim() === '') {
+            errors.push('Vui lòng nhập Tên (First Name)');
+        } else if (firstName.length > 10) {
+            errors.push('Tên tối đa 10 kí tự');
+        }
+
+        if (!lastName || lastName.trim() === '') {
+            errors.push('Vui lòng nhập Họ (Last Name)');
+        } else if (lastName.length > 10) {
+            errors.push('Họ tối đa 10 kí tự');
+        }
+
+        if (!email || email.trim() === '') {
+            errors.push('Vui lòng nhập Email');
+        } else if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
+            errors.push('Email phải đúng định dạng');
+        }
+
+        if (!password || password === '') {
+            errors.push('Vui lòng nhập Mật khẩu');
+        } else {
+            if (password.length > 12) {
+                errors.push('Mật khẩu tối đa 12 kí tự');
+            }
+            if (!/[A-Z]/.test(password)) {
+                errors.push('Mật khẩu phải bao gồm chữ cái in hoa');
+            }
+            if (!/[a-z]/.test(password)) {
+                errors.push('Mật khẩu phải bao gồm chữ cái viết thường');
+            }
+            if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+                errors.push('Mật khẩu phải bao gồm kí tự đặc biệt');
+            }
+            if (!/[0-9]/.test(password)) {
+                errors.push('Mật khẩu phải bao gồm số');
+            }
+        }
+    }
 
     if (errors.length > 0) {
         errors.forEach(error => req.flash('registerErrors', error));
@@ -77,8 +135,6 @@ router.post('/register', async (req, res, next) => {
             role: 'user'
         });
 
-        // ⚡ TỐI ƯU: Sử dụng async/await và Giảm Salt Rounds xuống 8 để tăng tốc độ phản hồi
-        // (Vẫn đảm bảo an toàn cơ bản cho đồ án)
         const salt = await bcryptjs.genSalt(8);
         newUser.password = await bcryptjs.hash(newUser.password, salt);
         
@@ -98,8 +154,6 @@ router.get('/login', (req, res) => {
     res.render('home/login', {title: 'Login'});
 });
 
-// ... Testimonials ...
-
 router.get('/logout', (req, res, next) => {
     req.logout(function(err) {
         if (err) { return next(err); }
@@ -108,8 +162,6 @@ router.get('/logout', (req, res, next) => {
         });
     });
 });
-
-
 
 router.get('/register', function (req, res, next) {
     const errors = req.flash('registerErrors');
@@ -123,10 +175,9 @@ router.get('/register', function (req, res, next) {
     });
 })
 
-
 router.get('/', async function(req, res, next) {
     try {
-        const [categories, allCourses, instructors, testimonials] = await Promise.all([
+        const [categories, allCourses, instructors, testimonials, posts] = await Promise.all([
             Category.find({ isActive: true }).select('name description').lean(),
             Course.find({ isActive: true })
                 .populate('category', 'name isActive')
@@ -139,20 +190,33 @@ router.get('/', async function(req, res, next) {
                 .limit(4)
                 .populate('user', 'firstName lastName')
                 .select('rating comment user')
+                .lean(),
+            Post.find({ isActive: true })
+                .sort({ createdAt: -1 })
+                .limit(3)
+                .populate('author', 'firstName lastName')
                 .lean()
         ]);
 
-        // Filter courses with active categories only
         const popularCourses = allCourses.filter(course => 
             course.category && course.category.isActive
-        ).slice(0, 3);
+        ).slice(0, 3).map(c => {
+            if (!c.thumbnail || c.thumbnail === '/img/default-course.jpg') c.thumbnail = '/img/course-1.jpg';
+            return c;
+        });
+
+        const safeInstructors = instructors.map(i => {
+            if (!i.avatar || i.avatar === '/img/default-avatar.jpg') i.avatar = '/img/avatar.jpg';
+            return i;
+        });
 
         res.render('home/index', {
             title: 'EnglishMaster - Trang chủ',
             categories: categories,
             popularCourses: popularCourses,
-            instructors: instructors,
+            instructors: safeInstructors,
             testimonials: testimonials,
+            posts: posts,
             activePage: 'home'
         });
     } catch (err) {
@@ -161,11 +225,9 @@ router.get('/', async function(req, res, next) {
     }
 });
 
-
 router.get('/404', function(req, res, next) {
     res.render('home/404', { title: '404 - Page Not Found' });
 });
-
 
 router.get('/about', async function(req, res, next) {
     try {
@@ -189,7 +251,8 @@ router.post('/contact', function(req, res, next) {
     const { name, email, phone, course, level, message, isConsultationRequested } = req.body;
     const newContact = new Contact({
         name, email, phone, course, level, message, 
-        isConsultationRequested: !!isConsultationRequested
+        isConsultationRequested: !!isConsultationRequested,
+        user: req.user ? req.user._id : null
     });
     newContact.save().then(() => {
         req.flash('success_message', 'Cảm ơn bạn! Chúng tôi đã nhận được tin nhắn và sẽ liên hệ sớm.');
@@ -206,72 +269,83 @@ router.get('/courses', async function(req, res, next) {
         const { minPrice, maxPrice, category, level, method, sort, search } = req.query;
         let query = { isActive: true };
 
-        console.log('--- Course Filter Debug ---');
-        console.log('Original Query Params:', req.query);
-
-        // Search by title
         if (search) {
             query.title = new RegExp(search, 'i');
         }
 
-        // Price filter
         if (minPrice || maxPrice) {
             query.price = {};
-            if (minPrice && minPrice !== "0") query.price.$gte = Number(minPrice);
-            if (maxPrice && maxPrice !== "10000000") query.price.$lte = Number(maxPrice);
+            const min = parseInt(minPrice) || 0;
+            const max = parseInt(maxPrice) || 10000000;
             
-            // If empty, clean up
-            if (Object.keys(query.price).length === 0) delete query.price;
+            // Luôn đặt cả gte và lte để tạo thành 1 khoảng lọc chính xác
+            query.price.$gte = min;
+            query.price.$lte = max;
+            
+            // Nếu là khoảng mặc định (0 - 10tr) thì có thể bỏ qua query để tối ưu (tùy chọn)
+            if (min === 0 && max === 10000000) delete query.price;
         }
 
-        // Category filter
-        if (category) {
+        // Pagination setup
+        const page = parseInt(req.query.page) || 1;
+        const limit = 6;
+        const skip = (page - 1) * limit;
+
+        // Ensure category filter only matches active categories if not specified
+        if (!query.category) {
+            const activeCategories = await Category.find({ isActive: true }).select('_id').lean();
+            const activeCatIds = activeCategories.map(c => c._id);
+            query.category = { $in: activeCatIds };
+        } else {
+            // If categories are provided, we should still ensure they are active
             const catArray = Array.isArray(category) ? category : [category];
-            query.category = { $in: catArray };
+            const activeCategories = await Category.find({ _id: { $in: catArray }, isActive: true }).select('_id').lean();
+            const activeCatIds = activeCategories.map(c => c._id);
+            query.category = { $in: activeCatIds };
         }
 
-        // Level filter
         if (level) {
             const levelArray = Array.isArray(level) ? level : [level];
             query.level = { $in: levelArray };
         }
 
-        // Teaching Method
         if (method) {
             const methodArray = Array.isArray(method) ? method : [method];
             query.teachingMethod = { $in: methodArray };
         }
 
-        console.log('Generated MongoDB Query:', JSON.stringify(query, null, 2));
-
-        // Sorting
-        let sortQuery = { createdAt: -1 }; // Default: Newest
+        let sortQuery = { createdAt: -1 }; 
         if (sort === 'price-asc') sortQuery = { price: 1 };
         if (sort === 'price-desc') sortQuery = { price: -1 };
-        if (sort === 'popularity') sortQuery = { averageRating: -1 }; // Simulation
+        if (sort === 'popularity') sortQuery = { averageRating: -1 }; 
         if (sort === 'rating') sortQuery = { averageRating: -1 };
 
-        const [courses, categories, levels, methods] = await Promise.all([
-            Course.find(query).populate('category').sort(sortQuery).lean(),
+        const [courses, totalCourses, categories, levels, methods] = await Promise.all([
+            Course.find(query).populate('category').sort(sortQuery).skip(skip).limit(limit).lean(),
+            Course.countDocuments(query),
             Category.find({ isActive: true }).lean(),
             Course.distinct('level', { isActive: true }),
             Course.distinct('teachingMethod', { isActive: true })
         ]);
 
-        // Filter out courses whose category is inactive
-        const filteredCourses = courses.filter(course => 
-            course.category && course.category.isActive
-        );
+        const totalPages = Math.ceil(totalCourses / limit);
 
         res.render('home/courses', { 
             title: 'Khóa học - EnglishMaster',
-            courses: filteredCourses,
+            courses: courses,
             categories: categories,
             levels: levels,
             methods: methods,
-            levels: levels,
-            methods: methods,
-            filters: req.query, // Pass back to maintain states
+            filters: req.query, 
+            pagination: {
+                currentPage: page,
+                totalPages: totalPages,
+                hasNext: page < totalPages,
+                hasPrev: page > 1,
+                prevPage: page - 1,
+                nextPage: page + 1,
+                pages: Array.from({ length: totalPages }, (_, i) => i + 1)
+            },
             activePage: 'courses'
         });
     } catch (err) {
@@ -279,102 +353,11 @@ router.get('/courses', async function(req, res, next) {
          next(err);
     }
 });
-// Learn Course Route (Dashboard) - Defined BEFORE detail route to ensure matching
-router.get('/courses/:id/learn', async function(req, res, next) {
-    if (!req.isAuthenticated()) {
-        req.flash('error_message', 'Vui lòng đăng nhập để truy cập khóa học.');
-        return res.redirect('/login');
-    }
 
-    try {
-        const courseId = req.params.id;
-        
-        // Verify enrollment
-        const user = await User.findById(req.user._id);
-        const isEnrolled = user.enrolledCourses.some(id => id.toString() === courseId);
-        
-        if (!isEnrolled && req.user.role !== 'admin') { // Admin can access all
-             req.flash('error_message', 'Bạn chưa đăng ký khóa học này.');
-             return res.redirect('/courses/' + courseId);
-        }
+router.get('/courses/:id/learn', (req, res) => res.redirect('/'));
 
-        const course = await Course.findById(courseId).lean();
-        if (!course) return res.redirect('/404');
+router.get('/courses/:id', (req, res) => res.redirect('/courses'));
 
-        const lessons = await Lesson.find({ course: courseId }).sort({ position: 1 }).lean();
-
-        res.render('home/course-lessons', {
-            title: 'Học: ' + course.title,
-            course: course,
-            lessons: lessons
-        });
-    } catch (err) {
-        console.error(err);
-        next(err);
-    }
-});
-
-// Course Detail
-router.get('/courses/:id', async function(req, res, next) {
-    try {
-        const course = await Course.findById(req.params.id).lean();
-        if (!course) {
-            return res.redirect('/404');
-        }
-        const categories = await Category.find({ isActive: true }).lean();
-        const reviews = await Review.find({ course: req.params.id, isActive: true }).populate('user').sort({createdAt: -1}).lean();
-        const lessons = await Lesson.find({ course: req.params.id }).sort({ position: 1 }).lean();
-        
-        // Fetch related courses
-        const relatedCourses = await Course.find({ 
-            category: course.category, 
-            _id: { $ne: course._id },
-            isActive: true 
-        })
-        .limit(3)
-        .lean();
-
-        res.render('home/course-detail', { 
-            title: course.title + ' - EnglishMaster',
-            course: course,
-            categories: categories,
-            reviews: reviews,
-            lessons: lessons,
-            relatedCourses: relatedCourses,
-            activePage: 'courses'
-        });
-    } catch (err) {
-        console.error(err);
-        next(err);
-    }
-});
-
-
-router.post('/courses/:id/review', async function(req, res, next) {
-    if (!req.isAuthenticated()) {
-        req.flash('error_message', 'Vui lòng đăng nhập để đánh giá');
-        req.session.returnTo = '/courses/' + req.params.id;
-        return res.redirect('/login');
-    }
-
-    try {
-        const { rating, comment } = req.body;
-        const newReview = new Review({
-            user: req.user._id,
-            course: req.params.id,
-            rating,
-            comment,
-            type: 'course'
-        });
-        await newReview.save();
-        req.flash('success_message', 'Đánh giá của bạn đã được gửi!');
-        res.redirect('/courses/' + req.params.id);
-    } catch (err) {
-        console.error(err);
-        req.flash('error_message', 'Lỗi gửi đánh giá: ' + err.message);
-        res.redirect('/courses/' + req.params.id);
-    }
-});
 
 
 router.get('/team', async function(req, res, next) {
@@ -391,13 +374,49 @@ router.get('/team', async function(req, res, next) {
     }
 });
 
-router.get('/testimonial', function(req, res, next) {
-    res.render('home/testimonial', { title: 'Đánh giá học viên - EnglishMaster' });
+router.get('/blog', async function(req, res, next) {
+    try {
+        const posts = await Post.find({ isActive: true }).sort({ createdAt: -1 }).populate('author', 'firstName lastName').lean();
+        res.render('home/blog', { 
+            title: 'Bài viết - EnglishMaster', 
+            activePage: 'blog',
+            posts: posts
+        });
+    } catch (err) {
+        console.error(err);
+        next(err);
+    }
 });
 
-// Cart Management
+router.get('/blog/:slug', async function(req, res, next) {
+    try {
+        const post = await Post.findOne({ slug: req.params.slug, isActive: true }).populate('author', 'firstName lastName').lean();
+        if (!post) return res.redirect('/404');
+        res.render('home/post-detail', { 
+            title: post.title + ' - EnglishMaster', 
+            activePage: 'blog',
+            post: post
+        });
+    } catch (err) {
+        console.error(err);
+        next(err);
+    }
+});
 
-// Helper function to calculate cart totals
+router.get('/reviews', async function(req, res, next) {
+    try {
+        const reviews = await Review.find({ isActive: true }).sort({ createdAt: -1 }).populate('user', 'firstName lastName').lean();
+        res.render('home/reviews', { 
+            title: 'Đánh giá học viên - EnglishMaster', 
+            activePage: 'reviews',
+            reviews: reviews
+        });
+    } catch (err) {
+        console.error(err);
+        next(err);
+    }
+});
+
 function calculateCartTotals(cart) {
     let totalQty = 0;
     let totalPrice = 0;
@@ -415,14 +434,12 @@ router.get('/cart', async function(req, res, next) {
     }
     
     try {
-        // Fetch 3 random suggested courses (or just latest)
         const suggestedCourses = await Course.aggregate([
             { $match: { isActive: true } },
             { $sample: { size: 3 } }
         ]);
 
         res.render('home/cart', { 
-            title: 'Giỏ hàng - EnglishMaster',
             title: 'Giỏ hàng - EnglishMaster',
             cart: req.session.cart,
             suggestedCourses: suggestedCourses,
@@ -438,168 +455,66 @@ router.get('/cart', async function(req, res, next) {
     }
 });
 
-router.post('/cart/add/:id', async function(req, res, next) {
-    const courseId = req.params.id;
-    if (!req.session.cart) {
-        req.session.cart = { items: [], totalQty: 0, totalPrice: 0 };
-    }
-    const cart = req.session.cart;
-    
-    // Check if item already exists
-    const existingItemIndex = cart.items.findIndex(item => item._id == courseId);
-
-    if (existingItemIndex > -1) {
-        cart.items[existingItemIndex].quantity += 1;
-    } else {
-        try {
-            const course = await Course.findById(courseId).lean();
-            if (course) {
-                cart.items.push({
-                    _id: course._id,
-                    title: course.title,
-                    price: course.price,
-                    thumbnail: course.thumbnail,
-                    duration: course.duration,
-                    quantity: 1
-                });
-            }
-        } catch (err) {
-            console.error(err);
-            req.flash('error_message', 'Lỗi khi thêm vào giỏ hàng');
-            return res.redirect('back');
-        }
-    }
-    calculateCartTotals(cart);
-    req.flash('success_message', 'Đã thêm khóa học vào giỏ hàng');
-    res.redirect('/cart');
-});
-
-router.post('/cart/update/:id', function(req, res, next) {
-    const courseId = req.params.id;
-    const quantity = parseInt(req.body.quantity);
-    if (req.session.cart) {
-        const cart = req.session.cart;
-        const itemIndex = cart.items.findIndex(item => item._id == courseId);
-        if (itemIndex > -1) {
-             if (quantity > 0) {
-                cart.items[itemIndex].quantity = quantity;
-             } else {
-                 cart.items.splice(itemIndex, 1);
-             }
-             calculateCartTotals(cart);
-        }
-    }
-    res.redirect('/cart');
-});
-
-router.post('/cart/remove/:id', function(req, res, next) {
-    const courseId = req.params.id;
-    if (req.session.cart) {
-        const cart = req.session.cart;
-        const itemIndex = cart.items.findIndex(item => item._id == courseId);
-        if (itemIndex > -1) {
-            cart.items.splice(itemIndex, 1);
-            calculateCartTotals(cart);
-        }
-    }
-    req.flash('success_message', 'Đã xóa khóa học khỏi giỏ hàng');
-    res.redirect('/cart');
-});
-
-// Checkout Routes
-router.get('/checkout', function(req, res, next) {
-    if (!req.session.cart || req.session.cart.items.length === 0) {
-        req.flash('error_message', 'Giỏ hàng trống');
-        return res.redirect('/cart');
-    }
-    res.render('home/checkout', {
-        title: 'Thanh toán - EnglishMaster',
-        cart: req.session.cart
-    });
-});
-
-router.post('/checkout/confirm', async function(req, res, next) {
-    if (!req.session.cart || req.session.cart.items.length === 0) {
-        return res.redirect('/cart');
-    }
-    
-    // Require login for checkout
+router.post('/courses/:id/enroll', async function(req, res, next) {
     if (!req.isAuthenticated()) {
-        req.flash('error_message', 'Vui lòng đăng nhập để thanh toán');
-        req.session.returnTo = '/checkout';
+        req.flash('error_message', 'Vui lòng đăng nhập để đăng ký khóa học');
+        req.session.returnTo = '/courses';
         return res.redirect('/login');
     }
 
     try {
-        const cart = req.session.cart;
-        const order = new Order({
-            user: req.user._id,
-            items: cart.items.map(item => ({
-                course: item._id,
-                price: item.price
-            })),
-            totalAmount: cart.totalPrice,
-            status: 'pending',
-            paymentMethod: req.body.paymentMethod || 'bank_transfer'
-        });
-
-        await order.save();
-
-        // Enroll user in courses (simulating payment success)
-        await User.findByIdAndUpdate(req.user._id, {
-            $addToSet: { enrolledCourses: { $each: cart.items.map(item => item._id) } }
-        });
-
-        // Clear cart
-        req.session.cart = { items: [], totalQty: 0, totalPrice: 0 };
+        const courseId = req.params.id;
+        const course = await Course.findById(courseId).lean();
         
-        // Clear cached unlocked categories to force refresh
-        delete req.session.unlockedCategories;
-        
-        req.flash('success_message', 'Đặt hàng thành công! Các khóa học đã được mở cho bạn trong Hồ sơ.');
+        if (!course) {
+            req.flash('error_message', 'Không tìm thấy khóa học');
+            return res.redirect('/courses');
+        }
+
+        const user = await User.findById(req.user._id);
+        if (user.enrolledCourses.includes(courseId)) {
+            req.flash('success_message', 'Bạn đã đăng ký khóa học này rồi!');
+            return res.redirect('/profile');
+        }
+
+
+
+        user.enrolledCourses.push(courseId);
+        await user.save();
+
+        req.flash('success_message', `Đăng ký thành công khóa học: ${course.title}!`);
         res.redirect('/profile');
 
     } catch (err) {
         console.error(err);
-        req.flash('error_message', 'Lỗi khi xử lý đơn hàng: ' + err.message);
-        res.redirect('/checkout');
+        req.flash('error_message', 'Lỗi khi đăng ký khóa học: ' + err.message);
+        res.redirect('/courses');
     }
 });
 
-// User Profile
 router.get('/profile', async function(req, res, next) {
     if (!req.isAuthenticated()) {
         return res.redirect('/login');
     }
 
     try {
-        const [orders, testResults, categories, examCategories, userWithCourses] = await Promise.all([
-            Order.find({ user: req.user._id })
-                .populate({
-                    path: 'items.course',
-                    populate: { path: 'category' }
-                })
-                .sort({ createdAt: -1 })
-                .lean(),
-            TestResult.find({ user: req.user._id })
-                .populate({
-                    path: 'test',
-                    populate: { path: 'category' }
-                })
-                .sort({ createdAt: -1 })
-                .lean(),
-            Category.find({ isActive: true }).lean(),
-            Category.find({ isExam: true }).lean(),
-            User.findById(req.user._id).populate('enrolledCourses').lean()
+        const [userWithCourses, contacts, reviews] = await Promise.all([
+            User.findById(req.user._id).populate('enrolledCourses').lean(),
+            Contact.find({ 
+                $or: [
+                    { user: req.user._id },
+                    { email: req.user.email }
+                ]
+            }).sort({ createdAt: -1 }).lean(),
+            Review.find({ user: req.user._id }).populate('course').sort({ createdAt: -1 }).lean()
         ]);
 
         res.render('home/profile', {
             title: 'Hồ sơ cá nhân',
-            orders: orders,
-            testResults: testResults,
-            categories: categories,
-            examCategories: examCategories,
-            enrolledCourses: userWithCourses.enrolledCourses
+            user: userWithCourses,
+            enrolledCourses: userWithCourses.enrolledCourses,
+            contacts: contacts,
+            reviews: reviews
         });
     } catch (err) {
         console.error(err);
@@ -607,184 +522,11 @@ router.get('/profile', async function(req, res, next) {
     }
 });
 
+router.get('/tests', (req, res) => res.redirect('/'));
+router.get('/tests/:id', (req, res) => res.redirect('/'));
+router.post('/tests/:id/submit', (req, res) => res.redirect('/'));
+router.get('/tests/:id/result/:resultId', (req, res) => res.redirect('/'));
 
-// === FRONTEND PRACTICE TESTS ===
-
-router.get('/tests', async function(req, res, next) {
-    try {
-        const tests = await PracticeTest.find({ isActive: true, isFree: true }).populate('category').lean();
-        res.render('home/tests', {
-            title: 'Luyện thi Online - EnglishMaster',
-            tests: tests,
-            tests: tests,
-            isPortal: true,
-            activePage: 'tests'
-        });
-    } catch (err) {
-        console.error(err);
-        next(err);
-    }
-});
-
-router.get('/tests/:id', async function(req, res, next) {
-    if (!req.isAuthenticated()) {
-        req.flash('error_message', 'Vui lòng đăng nhập để làm bài thi.');
-        req.session.returnTo = '/tests/' + req.params.id;
-        return res.redirect('/login');
-    }
-
-    try {
-        const test = await PracticeTest.findById(req.params.id)
-            .populate({
-                path: 'questions',
-                populate: { path: 'options' } // Assumption: options embedded or referenced? They are embedded in Question schema but check model.
-            })
-            .lean();
-        
-        if (!test || !test.isActive) return res.redirect('/tests');
-
-        res.render('home/do-test', {
-            title: 'Làm bài: ' + test.title,
-            title: 'Làm bài: ' + test.title,
-            test: test,
-            activePage: 'tests'
-        });
-    } catch (err) {
-        console.error(err);
-        res.redirect('/tests');
-    }
-});
-
-router.post('/tests/:id/submit', async function(req, res, next) {
-    if (!req.isAuthenticated()) return res.redirect('/login');
-    
-    try {
-        const testId = req.params.id;
-        const userAnswers = req.body.answers || {}; // Object: key=questionId, value=selectedOptionText
-        
-        const test = await PracticeTest.findById(testId).populate('questions').lean();
-        if (!test) return res.redirect('/tests');
-
-        let score = 0;
-        let correctCount = 0;
-        let resultsDetail = [];
-
-        test.questions.forEach(q => {
-            const selectedText = userAnswers[q._id];
-            
-            // Find correct option for this question
-            const correctOpt = q.options.find(o => o.isCorrect);
-            const isCorrect = correctOpt && selectedText === correctOpt.text;
-
-            if (isCorrect) {
-                correctCount++;
-            }
-
-            resultsDetail.push({
-                question: q._id,
-                selectedOption: selectedText,
-                isCorrect: isCorrect
-            });
-        });
-
-        // Calculate score
-        // Simple logic: (correct / total) * totalScore
-        const totalQ = test.questions.length;
-        if (totalQ > 0) {
-            score = Math.round((correctCount / totalQ) * test.totalScore);
-        }
-
-        const isPassed = score >= test.passingScore;
-
-        const newResult = new TestResult({
-            user: req.user._id,
-            test: test._id,
-            score,
-            correctAnswers: correctCount,
-            totalQuestions: totalQ,
-            answers: resultsDetail,
-            isPassed
-        });
-
-        await newResult.save();
-
-        // --- TỰ ĐỘNG CẬP NHẬT TRÌNH ĐỘ NGƯỜI DÙNG (DYNAMIC) ---
-        const populatedTest = await PracticeTest.findById(testId).populate('category').lean();
-        if (populatedTest.category && populatedTest.category.isExam) {
-            const cat = populatedTest.category;
-            const catName = cat.name;
-            const user = await User.findById(req.user._id);
-            let currentScore = user.levels.get(catName) || 0;
-            
-            let newLevelScore = 0;
-            const ratio = score / test.totalScore;
-
-            // Specialized rounding logic
-            if (catName.toUpperCase().includes('IELTS')) {
-                newLevelScore = Math.round(ratio * cat.maxScore * 2) / 2;
-            } else if (catName.toUpperCase().includes('TOEIC')) {
-                newLevelScore = Math.min(cat.maxScore, Math.round(ratio * cat.maxScore / 5) * 5);
-            } else {
-                newLevelScore = Math.round(ratio * cat.maxScore);
-            }
-
-            if (newLevelScore > currentScore) {
-                user.levels.set(catName, newLevelScore);
-                await user.save();
-                console.log(`✅ Updated dynamic level for ${catName}: ${newLevelScore}`);
-            }
-        }
-        // -----------------------------------------------------
-        // ---------------------------------------------
-
-        res.redirect(`/tests/${testId}/result/${newResult._id}`);
-
-    } catch (err) {
-         console.error(err);
-         res.redirect('/tests');
-    }
-});
-
-router.get('/tests/:id/result/:resultId', async function(req, res, next) {
-     if (!req.isAuthenticated()) return res.redirect('/login');
-
-     try {
-         const result = await TestResult.findById(req.params.resultId)
-            .populate({
-                path: 'answers.question',
-                model: 'Question'
-            })
-            .lean();
-        
-        const test = await PracticeTest.findById(req.params.id).lean();
-
-        if (!result || !test || result.user.toString() !== req.user._id.toString()) {
-            return res.redirect('/tests');
-        }
-
-        // Map detailed results for display
-        const detailedResults = result.answers.map(ans => {
-            return {
-                question: ans.question,
-                selectedOption: ans.selectedOption,
-                isCorrect: ans.isCorrect
-            };
-        });
-
-        res.render('home/test-result', {
-            title: 'Kết quả thi: ' + test.title,
-            test: test,
-            result: result,
-            detailedResults: detailedResults
-        });
-
-     } catch (err) {
-         console.error(err);
-         res.redirect('/tests');
-     }
-});
-
-// === PRACTICE PROGRAMS (TOEIC, IELTS, TOEFL) ===
 async function checkExamAccess(req, res, categoryName) {
     if (!req.isAuthenticated()) return res.redirect('/login');
     
@@ -797,7 +539,6 @@ async function checkExamAccess(req, res, categoryName) {
 
         if (user.role === 'admin') return { cat, hasAccess: true };
 
-        // Check if user is enrolled in any course belonging to this category
         const coursesInCat = await Course.find({ category: cat._id }).select('_id');
         const courseIdsInCat = coursesInCat.map(c => c._id.toString());
         const enrolledCourses = user.enrolledCourses || [];
@@ -810,62 +551,14 @@ async function checkExamAccess(req, res, categoryName) {
     }
 }
 
-// Dynamic Exam Category Route (General)
-router.get('/:categorySlug', async (req, res, next) => {
-    // List of static routes to ignore to avoid conflicts
-    const staticRoutes = ['login', 'register', 'logout', 'profile', 'courses', 'tests', 'cart', 'contact', 'about', 'grammar', 'vocabulary', 'practice', 'admin'];
-    if (staticRoutes.includes(req.params.categorySlug)) {
-        return next(); // Let other specific routes handle it
-    }
-
-    try {
-        const cat = await Category.findOne({ slug: req.params.categorySlug, isActive: true });
-        if (!cat) {
-            return next(); // Move to 404 if no category found
-        }
-        
-        const tests = await PracticeTest.find({ category: cat._id, isActive: true })
-            .populate('category')
-            .lean();
-            
-        res.render('home/tests', { 
-            title: 'Luyện thi ' + cat.name, 
-            tests, 
-            currentCategory: cat.name 
-        });
-    } catch (err) { 
-        console.error(err);
-        res.redirect('/404'); 
-    }
-});
+router.get('/:categorySlug', (req, res, next) => next());
 
 router.get('/practice', (req, res) => res.redirect('/tests'));
 
-// === RESOURCES (Grammar, Vocabulary) ===
-router.get('/grammar', async (req, res) => {
-    try {
-        const resources = await Resource.find({ type: 'grammar', isActive: true }).sort({createdAt: -1}).lean();
-        res.render('home/resources', { title: 'Ngữ pháp (Grammar)', resources, type: 'Grammar' });
-    } catch (err) { res.redirect('/404'); }
-});
+router.get('/grammar', (req, res) => res.redirect('/'));
+router.get('/vocabulary', (req, res) => res.redirect('/'));
+router.get('/resources/:id', (req, res) => res.redirect('/'));
 
-router.get('/vocabulary', async (req, res) => {
-    try {
-        const resources = await Resource.find({ type: 'vocabulary', isActive: true }).sort({createdAt: -1}).lean();
-        res.render('home/resources', { title: 'Từ vựng (Vocabulary)', resources, type: 'Vocabulary' });
-    } catch (err) { res.redirect('/404'); }
-});
-
-// Resource Detail
-router.get('/resources/:id', async (req, res) => {
-    try {
-        const resource = await Resource.findById(req.params.id).lean();
-        if(!resource) return res.redirect('/404');
-        res.render('home/resource-detail', { title: resource.title, resource });
-    } catch (err) { res.redirect('/404'); }
-});
-
-// Helper route to create admin user
 router.get('/create-admin', (req, res) => {
     const newUser = new User({
         firstName: 'Admin',
@@ -889,7 +582,6 @@ router.get('/create-admin', (req, res) => {
     });
 });
 
-// Review Submission
 router.post('/reviews', async (req, res) => {
     if (!req.isAuthenticated()) {
         req.flash('error_message', 'Vui lòng đăng nhập để gửi đánh giá.');

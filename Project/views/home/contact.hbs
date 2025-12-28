@@ -2,14 +2,14 @@
 <div class="container-xxl py-5">
     <div class="container">
         <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
-            <h6 class="section-title bg-white text-center text-primary px-3">Liên Hệ</h6>
-            <h1 class="mb-5">Tư Vấn Khóa Học Miễn Phí</h1>
-            <p class="mb-5">Sẵn sàng bắt đầu hành trình học tiếng Anh của bạn? Liên hệ với chúng tôi để được tư vấn miễn phí và đề xuất khóa học phù hợp.</p>
+            <h6 class="section-title bg-white text-center text-primary px-3">{{site.contactSubtitle}}</h6>
+            <h1 class="mb-5">{{site.contactTitle}}</h1>
+            <p class="mb-5 px-lg-5">{{site.contactDescription}}</p>
         </div>
         <div class="row g-4">
             <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
                 <h5>Thông Tin Liên Hệ</h5>
-                <p class="mb-4">Chúng tôi luôn sẵn sàng hỗ trợ bạn đạt được mục tiêu tiếng Anh. Liên hệ ngay để được tư vấn khóa học, kiểm tra trình độ hoặc giải đáp mọi thắc mắc.</p>
+                <p class="mb-4">Chúng tôi luôn sẵn sàng hỗ trợ bạn đạt được mục tiêu tiếng Anh. Liên hệ ngay để được tư vấn!</p>
 
                 <div class="d-flex align-items-center mb-4">
                     <div class="d-flex align-items-center justify-content-center flex-shrink-0 bg-primary" style="width: 50px; height: 50px;">
@@ -17,7 +17,7 @@
                     </div>
                     <div class="ms-3">
                         <h5 class="text-primary">Văn Phòng Chính</h5>
-                        <p class="mb-0">123 Đường Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh</p>
+                        <p class="mb-0">{{site.footerAddress}}</p>
                     </div>
                 </div>
 
@@ -27,7 +27,7 @@
                     </div>
                     <div class="ms-3">
                         <h5 class="text-primary">Số Điện Thoại</h5>
-                        <p class="mb-0">+84 28 1234 5678</p>
+                        <p class="mb-0">{{site.footerPhone}}</p>
                     </div>
                 </div>
 
@@ -37,7 +37,7 @@
                     </div>
                     <div class="ms-3">
                         <h5 class="text-primary">Địa Chỉ Email</h5>
-                        <p class="mb-0">info@englishmaster.edu.vn</p>
+                        <p class="mb-0">{{site.footerEmail}}</p>
                     </div>
                 </div>
 
@@ -47,26 +47,26 @@
                     </div>
                     <div class="ms-3">
                         <h5 class="text-primary">Giờ Làm Việc</h5>
-                        <p class="mb-0">Thứ 2 - Thứ 6: 8:00 - 20:00<br>Thứ 7 - Chủ nhật: 8:00 - 18:00</p>
+                        <p class="mb-0" style="white-space: pre-line;">{{site.contactWorkingHours}}</p>
                     </div>
                 </div>
 
                 <div class="mt-4">
                     <h6 class="text-primary mb-3">Theo Dõi Chúng Tôi</h6>
                     <div class="d-flex">
-                        <a class="btn btn-square btn-primary me-2" href=""><i class="fab fa-facebook-f"></i></a>
-                        <a class="btn btn-square btn-primary me-2" href=""><i class="fab fa-youtube"></i></a>
-                        <a class="btn btn-square btn-primary me-2" href=""><i class="fab fa-linkedin-in"></i></a>
-                        <a class="btn btn-square btn-primary" href=""><i class="fab fa-tiktok"></i></a>
+                        <a class="btn btn-square btn-primary me-2" href="{{site.socialFacebook}}"><i class="fab fa-facebook-f"></i></a>
+                        <a class="btn btn-square btn-primary me-2" href="{{site.socialYoutube}}"><i class="fab fa-youtube"></i></a>
+                        <a class="btn btn-square btn-primary me-2" href="{{site.socialLinkedin}}"><i class="fab fa-linkedin-in"></i></a>
+                        <a class="btn btn-square btn-primary" href="{{site.socialTiktok}}"><i class="fab fa-tiktok"></i></a>
                     </div>
                 </div>
             </div>
 
             <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
                 <iframe class="position-relative rounded w-100 h-100"
-                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.424184103987!2d106.7002501757599!3d10.775974189372122!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752f467a87e8c5%3A0xa6cbc5c559a7d4e1!2sNguyen%20Hue%20Street%2C%20District%201%2C%20Ho%20Chi%20Minh%20City%2C%20Vietnam!5e0!3m2!1sen!2s!4v1700000000000!5m2!1sen!2s"
+                        src="{{#if site.contactMapsUrl}}{{{site.contactMapsUrl}}}{{else}}https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.424184103987!2d106.7002501757599!3d10.775974189372122!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752f467a87e8c5%3A0xa6cbc5c559a7d4e1!2sNguyen%20Hue%20Street%2C%20District%201%2C%20Ho%20Chi%20Minh%20City%2C%20Vietnam!5e0!3m2!1sen!2s!4v1700000000000!5m2!1sen!2s{{/if}}"
                         frameborder="0" style="min-height: 400px; border:0;" allowfullscreen="" aria-hidden="false"
-                        tabindex="0" title="Bản đồ EnglishMaster"></iframe>
+                        tabindex="0" title="Bản đồ {{site.logoText}}"></iframe>
             </div>
 
             <div class="col-lg-4 col-md-12 wow fadeInUp" data-wow-delay="0.5s">
@@ -74,13 +74,13 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <div class="form-floating">
-                                <input type="text" class="form-control" id="name" name="name" placeholder="Họ và tên" required>
+                                <input type="text" class="form-control" id="name" name="name" placeholder="Họ và tên" required value="{{#if isLoggedIn}}{{currentUserName}}{{/if}}">
                                 <label for="name">Họ và tên *</label>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-floating">
-                                <input type="email" class="form-control" id="email" name="email" placeholder="Địa chỉ email" required>
+                                <input type="email" class="form-control" id="email" name="email" placeholder="Địa chỉ email" required value="{{#if isLoggedIn}}{{user.email}}{{/if}}">
                                 <label for="email">Địa chỉ email *</label>
                             </div>
                         </div>
@@ -106,35 +106,12 @@
                         </div>
                         <div class="col-12">
                             <div class="form-floating">
-                                <select class="form-select" id="level" name="level">
-                                    <option value="" selected disabled>Chọn trình độ hiện tại</option>
-                                    <option value="beginner">Sơ cấp (A1-A2)</option>
-                                    <option value="intermediate">Trung cấp (B1-B2)</option>
-                                    <option value="advanced">Cao cấp (C1-C2)</option>
-                                    <option value="notsure">Chưa biết rõ</option>
-                                </select>
-                                <label for="level">Trình độ tiếng Anh hiện tại</label>
-                            </div>
-                        </div>
-                        <div class="col-12">
-                            <div class="form-floating">
                                 <textarea class="form-control" placeholder="Để lại lời nhắn của bạn tại đây" id="message" name="message" style="height: 120px"></textarea>
                                 <label for="message">Lời nhắn của bạn</label>
                             </div>
                         </div>
                         <div class="col-12">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="consultation" name="isConsultationRequested" value="true">
-                                <label class="form-check-label" for="consultation">
-                                    Tôi muốn được tư vấn miễn phí và kiểm tra trình độ
-                                </label>
-                            </div>
-                        </div>
-                        <div class="col-12">
                             <button class="btn btn-primary w-100 py-3" type="submit">Gửi Tin Nhắn</button>
-                        </div>
-                        <div class="col-12">
-                            <small class="text-muted">* Thông tin bắt buộc. Chúng tôi sẽ liên hệ với bạn trong vòng 24 giờ.</small>
                         </div>
                     </div>
                 </form>
@@ -144,27 +121,27 @@
         <!-- Phương Thức Liên Hệ Khác -->
         <div class="row mt-5">
             <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
-                <div class="bg-light text-center p-4 rounded">
+                <div class="bg-light text-center p-4 rounded shadow-sm border">
                     <i class="fa fa-comments fa-3x text-primary mb-3"></i>
                     <h5>Chat Trực Tuyến</h5>
-                    <p class="mb-3">Trò chuyện trực tiếp với tư vấn viên của chúng tôi</p>
-                    <a href="#" class="btn btn-primary">Bắt Đầu Chat</a>
+                    <p class="mb-3 small">Trò chuyện trực tiếp với tư vấn viên</p>
+                    <a href="#" class="btn btn-outline-primary px-4">Bắt Đầu Chat</a>
                 </div>
             </div>
             <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
-                <div class="bg-light text-center p-4 rounded">
+                <div class="bg-light text-center p-4 rounded shadow-sm border">
                     <i class="fa fa-phone fa-3x text-primary mb-3"></i>
                     <h5>Gọi Điện Thoại</h5>
-                    <p class="mb-3">Nói chuyện trực tiếp với tư vấn viên khóa học</p>
-                    <a href="tel:+842812345678" class="btn btn-primary">Gọi Ngay</a>
+                    <p class="mb-3 small">Nói chuyện trực tiếp qua Hotline</p>
+                    <a href="tel:{{site.footerPhone}}" class="btn btn-outline-primary px-4">Gọi Ngay</a>
                 </div>
             </div>
             <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
-                <div class="bg-light text-center p-4 rounded">
+                <div class="bg-light text-center p-4 rounded shadow-sm border">
                     <i class="fa fa-calendar fa-3x text-primary mb-3"></i>
                     <h5>Đặt Lịch Hẹn</h5>
-                    <p class="mb-3">Đặt lịch tham quan trung tâm và kiểm tra trình độ</p>
-                    <a href="/appointment" class="btn btn-primary">Đặt Lịch Ngay</a>
+                    <p class="mb-3 small">Tham quan trung tâm & test trình độ</p>
+                    <a href="/contact" class="btn btn-outline-primary px-4">Đặt Lịch Ngay</a>
                 </div>
             </div>
         </div>
@@ -177,45 +154,24 @@
                     <h2 class="mb-5">Cần Hỗ Trợ Thêm?</h2>
                 </div>
                 <div class="accordion" id="faqAccordion">
+                    {{#each site.faqs}}
                     <div class="accordion-item">
                         <h2 class="accordion-header">
-                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
-                                Tôi có được học thử không?
+                            <button class="accordion-button {{#unless @first}}collapsed{{/unless}} text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#faq{{@index}}">
+                                {{this.question}}
                             </button>
                         </h2>
-                        <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                        <div id="faq{{@index}}" class="accordion-collapse collapse {{#if @first}}show{{/if}}" data-bs-parent="#faqAccordion">
                             <div class="accordion-body">
-                                Có, chúng tôi cung cấp buổi học thử miễn phí cho tất cả các khóa học. Bạn có thể trải nghiệm phương pháp giảng dạy trước khi quyết định đăng ký.
+                                {{this.answer}}
                             </div>
                         </div>
                     </div>
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
-                                Làm thế nào để kiểm tra trình độ?
-                            </button>
-                        </h2>
-                        <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                            <div class="accordion-body">
-                                Chúng tôi cung cấp bài kiểm tra trình độ miễn phí tại trung tâm hoặc online. Liên hệ với chúng tôi để được sắp xếp lịch kiểm tra phù hợp.
-                            </div>
-                        </div>
-                    </div>
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
-                                Có chính sách ưu đãi cho nhóm không?
-                            </button>
-                        </h2>
-                        <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                            <div class="accordion-body">
-                                Có, chúng tôi có nhiều chính sách ưu đãi cho nhóm từ 3 người trở lên, sinh viên, và đăng ký nhiều khóa học. Liên hệ để được tư vấn chi tiết.
-                            </div>
-                        </div>
-                    </div>
+                    {{/each}}
                 </div>
             </div>
         </div>
     </div>
 </div>
+<!-- Contact End -->
 <!-- Contact End -->

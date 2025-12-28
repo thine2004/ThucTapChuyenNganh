@@ -1,105 +1,222 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../models/User'); // Import User Model để truy vấn MongoDB
+const User = require('../models/User'); 
 const Category = require('../models/Category');
 const Course = require('../models/Course');
 const Contact = require('../models/Contact');
 const Review = require('../models/Review');
-const Lesson = require('../models/Lesson');
-const Question = require('../models/Question');
-const PracticeTest = require('../models/PracticeTest');
-const Resource = require('../models/Resource');
-const Order = require('../models/Order');
+const Post = require('../models/Post');
+const Setting = require('../models/Setting');
+const bcryptjs = require('bcryptjs');
+const passport = require('passport');
+const multer = require('multer');
+const path = require('path');
 
-// Middleware kiểm tra quyền truy cập Admin
-// Middleware kiểm tra quyền truy cập Admin
+// Cấu hình Multer để tải ảnh lên
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, './public/uploads');
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + path.extname(file.originalname));
+    }
+});
+
+const upload = multer({ 
+    storage: storage,
+    limits: { fileSize: 5 * 1024 * 1024 }, // Giới hạn 5MB
+    fileFilter: (req, file, cb) => {
+        const filetypes = /jpeg|jpg|png|gif|webp/;
+        const mimetype = filetypes.test(file.mimetype);
+        const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+        if (mimetype && extname) {
+            return cb(null, true);
+        }
+        cb(new Error("Chỉ cho phép tải lên các định dạng ảnh (jpeg, jpg, png, gif, webp)"));
+    }
+});
+
 function isAdmin(req, res, next) {
     if (req.isAuthenticated() && req.user.role === 'admin') {
         return next();
     }
     req.session.returnTo = req.originalUrl;
-    req.flash('error_message', 'Access denied. You must be an admin.');
-    res.redirect('/login');
+    req.flash('error_message', 'Vui lòng đăng nhập quyền Admin.');
+    res.redirect('/admin/login');
 }
 
-router.all('/*', function(req, res, next) {
+router.get('/login', (req, res) => {
+    res.render('admin/login', { layout: 'admin', title: 'Admin Login', hideAdminNav: true });
+});
+
+router.post('/login', (req, res, next) => {
+    const { email, password } = req.body;
+    if (!email && !password) {
+        req.flash('error_message', 'Vui lòng nhập email và mật khẩu');
+        return res.redirect('/admin/login');
+    } else if (!email) {
+        req.flash('error_message', 'Vui lòng nhập email');
+        return res.redirect('/admin/login');
+    } else if (!password) {
+        req.flash('error_message', 'Vui lòng nhập mật khẩu');
+        return res.redirect('/admin/login');
+    } else if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
+        req.flash('error_message', 'Email sai định dạng');
+        return res.redirect('/admin/login');
+    }
+
+    passport.authenticate('local', (err, user, info) => {
+        if (err) return next(err);
+        if (!user) {
+            req.flash('error_message', info.message || 'Đăng nhập thất bại');
+            return res.redirect('/admin/login');
+        }
+        if (user.role !== 'admin') {
+            req.flash('error_message', 'Tài khoản không có quyền Admin');
+            return res.redirect('/admin/login');
+        }
+        req.logIn(user, (err) => {
+            if (err) return next(err);
+            const returnTo = req.session.returnTo || '/admin';
+            delete req.session.returnTo;
+            req.flash('success_message', 'Chào mừng tài khoản admin');
+            return res.redirect(returnTo);
+        });
+    })(req, res, next);
+});
+
+router.get('/logout', (req, res, next) => {
+    req.logout(function(err) {
+        if (err) return next(err);
+        req.session.destroy(err => {
+            res.redirect('/admin/login');
+        });
+    });
+});
+
+router.get('/register', (req, res) => {
+    const errors = req.flash('registerErrors');
+    const data = req.flash('registerData')[0] || {};
+    res.render('admin/register', { 
+        layout: 'admin', 
+        title: 'Admin Register',
+        errors, 
+        firstName: data.firstName, 
+        lastName: data.lastName, 
+        email: data.email,
+        hideAdminNav: true
+    });
+});
+
+router.post('/register', async (req, res) => {
+    let errors = [];
+    const { firstName, lastName, email, password } = req.body;
+
+
+
+    if (!firstName || firstName.trim() === '') {
+        errors.push('Vui lòng nhập Tên (First Name)');
+    } else if (firstName.length > 10) {
+        errors.push('Tên tối đa 10 kí tự');
+    }
+
+    if (!lastName || lastName.trim() === '') {
+        errors.push('Vui lòng nhập Họ (Last Name)');
+    } else if (lastName.length > 10) {
+        errors.push('Họ tối đa 10 kí tự');
+    }
+
+    if (!email || email.trim() === '') {
+        errors.push('Vui lòng nhập Email');
+    } else if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
+        errors.push('Email phải đúng định dạng');
+    }
+
+    if (!password || password === '') {
+        errors.push('Vui lòng nhập Mật khẩu');
+    } else {
+        if (password.length > 12) {
+            errors.push('Mật khẩu tối đa 12 kí tự');
+        }
+        if (!/[A-Z]/.test(password)) {
+            errors.push('Mật khẩu phải bao gồm chữ cái in hoa');
+        }
+        if (!/[a-z]/.test(password)) {
+            errors.push('Mật khẩu phải bao gồm chữ cái viết thường');
+        }
+        if (!/[0-9]/.test(password)) {
+            errors.push('Mật khẩu phải bao gồm số');
+        }
+        if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+            errors.push('Mật khẩu phải bao gồm kí tự đặc biệt');
+        }
+    }
+
+    if (errors.length > 0) {
+        errors.forEach(error => req.flash('registerErrors', error));
+        req.flash('registerData', req.body);
+        return res.redirect('/admin/register');
+    }
+
+    try {
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            req.flash('error_message', 'Email đã tồn tại!');
+            req.flash('registerData', req.body);
+            return res.redirect('/admin/register');
+        }
+
+        const newUser = new User({
+            firstName, lastName, email, password, role: 'admin'
+        });
+
+        const salt = await bcryptjs.genSalt(10);
+        newUser.password = await bcryptjs.hash(password, salt);
+        await newUser.save();
+
+        req.flash('success_message', 'Đăng ký Admin thành công! Vui lòng đăng nhập.');
+        res.redirect('/admin/login');
+    } catch (err) {
+        req.flash('error_message', 'Lỗi: ' + err.message);
+        res.redirect('/admin/register');
+    }
+});
+
+router.all('/*', isAdmin, function(req, res, next) {
     res.locals.layout = 'admin';
     next();
 });
 
-router.use(isAdmin);
 
-// DEBUG ROUTE
-router.get('/tests/edit/:id', async function(req, res, next) {
-    console.log('🔍 Accessing Test Edit:', req.params.id);
-    try {
-        const [test, categories] = await Promise.all([
-            PracticeTest.findById(req.params.id).lean(),
-            Category.find().lean()
-        ]);
 
-        if (!test) {
-            console.log('❌ Test not found in DB:', req.params.id);
-            req.flash('error_message', 'Không tìm thấy đề thi');
-            return res.redirect('/admin/tests');
-        }
-
-        res.render('admin/test/edit-test', {
-            title: 'Sửa Đề thi',
-            test: test,
-            categories: categories
-        });
-    } catch (err) {
-        console.error('🔥 Error in Test Edit Route:', err);
-        res.redirect('/admin/tests');
-    }
-});
-
-// Dashboard
 router.get('/', async function(req, res, next) {
     try {
         const [
             userCount, 
             adminCount, 
             courseCount, 
-            pendingOrders,
-            totalRevenueData,
-            newContacts,
-            latestOrders
+            newContacts
         ] = await Promise.all([
             User.countDocuments({ role: 'user' }),
             User.countDocuments({ role: 'admin' }),
             Course.countDocuments({}),
-            Order.countDocuments({ status: 'pending' }),
-            Order.aggregate([
-                { $match: { status: 'completed' } },
-                { $group: { _id: null, total: { $sum: "$totalAmount" } } }
-            ]),
-            Contact.countDocuments({ status: 'pending' }),
-            Order.find().populate('user').limit(5).sort({ createdAt: -1 }).lean()
+            Contact.countDocuments({ status: 'new' })
         ]);
-
-        const totalRevenue = totalRevenueData.length > 0 ? totalRevenueData[0].total : 0;
 
         res.render('admin/index', {
             title: 'Tổng quan - Admin Dashboard',
             stats: { 
                 userCount, 
                 adminCount, 
-                courseCount, 
-                pendingOrders, 
-                totalRevenue,
+                courseCount,
                 newContacts
-            },
-            latestOrders
+            }
         });
     } catch (err) {
-        console.error(err);
         res.render('admin/index', { title: 'Tổng quan - Admin Dashboard' });
     }
 });
 
-// Route xử lý danh sách Users (Học viên, Giảng viên, Admin) TỪ MONGODB
 router.get('/users', function(req, res, next) {
     const role = req.query.role;
     let query = {};
@@ -107,7 +224,6 @@ router.get('/users', function(req, res, next) {
         query.role = role;
     }
 
-    // Tìm kiếm user trong MongoDB
     User.find(query)
         .lean()
         .sort({ createdAt: -1 })
@@ -119,12 +235,10 @@ router.get('/users', function(req, res, next) {
             });
         })
         .catch(err => {
-            console.error('Lỗi khi lấy danh sách user:', err);
             res.redirect('/admin');
         });
 });
 
-// Add User - GET
 router.get('/users/add', function(req, res, next) {
     res.render('admin/users/add-user', { 
         title: 'Thêm Người dùng',
@@ -132,17 +246,14 @@ router.get('/users/add', function(req, res, next) {
     });
 });
 
-// Add User - POST
-router.post('/users/add', function(req, res, next) {
+router.post('/users/add', upload.single('avatarFile'), function(req, res, next) {
     const { firstName, lastName, email, password, role, phone, isActive } = req.body;
     
-    // Basic validation
     if (!email || !password || !firstName || !lastName) {
         req.flash('error_message', 'Vui lòng điền đầy đủ thông tin bắt buộc');
         return res.redirect('/admin/users/add?role=' + role);
     }
 
-    // Check if email exists
     User.findOne({ email: email }).then(user => {
         if (user) {
             req.flash('error_message', 'Email đã tồn tại');
@@ -156,13 +267,12 @@ router.post('/users/add', function(req, res, next) {
             password, 
             role,
             phone,
-            isActive: !!isActive
+            isActive: !!isActive,
+            avatar: req.file ? '/uploads/' + req.file.filename : '/img/avatar.jpg'
         });
 
-        const bcryptjs = require('bcryptjs'); // Ensure bcryptjs is available or move to top if not
+        const bcryptjs = require('bcryptjs');
         
-        // Hash password (assuming User model has pre-save hook or we do it here)
-        // Previous register code did it manually, so we do it here too
         bcryptjs.genSalt(10, function (err, salt) {
             bcryptjs.hash(newUser.password, salt, (err, hash) => {
                 newUser.password = hash;
@@ -170,7 +280,6 @@ router.post('/users/add', function(req, res, next) {
                     req.flash('success_message', 'Thêm người dùng thành công!');
                     res.redirect('/admin/users');
                 }).catch(err => {
-                     console.error(err);
                     req.flash('error_message', 'Lỗi db: ' + err.message);
                     res.redirect('/admin/users/add?role=' + role);
                 });
@@ -179,34 +288,19 @@ router.post('/users/add', function(req, res, next) {
     });
 });
 
-// Edit User - GET
 router.get('/users/edit/:id', async function(req, res, next) {
     try {
         const user = await User.findById(req.params.id).lean();
-        const examCategories = await Category.find({ isExam: true }).lean();
-
-        if (!user) {
-            req.flash('error_message', 'Không tìm thấy người dùng');
-            return res.redirect('/admin/users');
-        }
-
-        // Convert Map to plain object for easier Handlebars access if needed
-        // But since we use .lean(), user.levels might already be a plain object 
-        // depending on how Mongoose Map handles lean().
-        
         res.render('admin/users/edit-user', {
              title: 'Sửa Người dùng',
-             user: user,
-             examCategories: examCategories
+             user: user
         });
     } catch (err) {
-        console.error(err);
         res.redirect('/admin');
     }
 });
 
-// Edit User - PUT
-router.put('/users/edit/:id', function(req, res, next) {
+router.put('/users/edit/:id', upload.single('avatarFile'), function(req, res, next) {
     const { firstName, lastName, role, isActive, levels } = req.body;
     
     User.findById(req.params.id).then(user => {
@@ -217,7 +311,10 @@ router.put('/users/edit/:id', function(req, res, next) {
         user.role = role;
         user.isActive = !!isActive;
 
-        // Update dynamic levels
+        if (req.file) {
+            user.avatar = '/uploads/' + req.file.filename;
+        }
+
         if (levels && typeof levels === 'object') {
             Object.keys(levels).forEach(key => {
                 user.levels.set(key, parseFloat(levels[key]) || 0);
@@ -229,53 +326,42 @@ router.put('/users/edit/:id', function(req, res, next) {
         req.flash('success_message', 'Cập nhật thành công!');
         res.redirect('/admin/users');
     }).catch(err => {
-        console.error(err);
         req.flash('error_message', 'Lỗi: ' + err.message);
         res.redirect('/admin/users');
     });
 });
 
-// Category list
 router.get('/category', function(req, res, next) {
     Category.find().sort({ createdAt: -1 }).lean().then(categories => {
-        console.log('📋 Fetched categories count:', categories.length);
         res.render('admin/category/category-list', { 
             title: 'Quản lý Danh mục',
             categories: categories
         });
     }).catch(err => {
-        console.error(err);
         res.redirect('/admin');
     });
 });
 
-// Add Category - GET
 router.get('/category/add', function(req, res, next) {
     res.render('admin/category/add-category', { title: 'Thêm Danh mục' });
 });
 
-// Add Category - POST
 router.post('/category/add', function(req, res, next) {
-    const { name, description, isActive, isExam, maxScore } = req.body;
+    const { name, description, isActive } = req.body;
     const newCategory = new Category({
         name,
         description,
-        isExam: !!isExam,
-        maxScore: Number(maxScore) || 100,
         isActive: !!isActive
     });
     newCategory.save().then(() => {
-        console.log('✅ Success: Category created:', name);
         req.flash('success_message', 'Thêm danh mục thành công!');
         res.redirect('/admin/category');
     }).catch(err => {
-        console.error('❌ Error creating category:', err);
         req.flash('error_message', 'Lỗi khi thêm danh mục: ' + err.message);
         res.redirect('/admin/category/add');
     });
 });
 
-// Edit Category - GET
 router.get('/category/edit/:id', function(req, res, next) {
     Category.findById(req.params.id).lean().then(category => {
         if (!category) {
@@ -287,14 +373,12 @@ router.get('/category/edit/:id', function(req, res, next) {
             category: category
         });
     }).catch(err => {
-        console.error(err);
         res.redirect('/admin/category');
     });
 });
 
-// Edit Category - PUT
 router.put('/category/edit/:id', function(req, res, next) {
-    const { name, description, isActive, isExam, maxScore } = req.body;
+    const { name, description, isActive } = req.body;
     Category.findById(req.params.id).then(category => {
         if (!category) {
             req.flash('error_message', 'Không tìm thấy danh mục');
@@ -303,23 +387,18 @@ router.put('/category/edit/:id', function(req, res, next) {
         category.name = name;
         category.description = description;
         category.isActive = !!isActive;
-        category.isExam = !!isExam;
-        category.maxScore = Number(maxScore) || 100;
         return category.save();
     }).then(() => {
         req.flash('success_message', 'Cập nhật danh mục thành công!');
         res.redirect('/admin/category');
     }).catch(err => {
-        console.error(err);
         req.flash('error_message', 'Lỗi khi cập nhật danh mục: ' + err.message);
         res.redirect('/admin/category/edit/' + req.params.id);
     });
 });
 
-// Delete Category - DELETE
 router.delete('/category/delete/:id', async function(req, res, next) {
     try {
-        // Check if any courses are using this category
         const courseCount = await Course.countDocuments({ category: req.params.id });
         if (courseCount > 0) {
             req.flash('error_message', 'Không thể xóa danh mục đang có khóa học!');
@@ -330,15 +409,11 @@ router.delete('/category/delete/:id', async function(req, res, next) {
         req.flash('success_message', 'Đã xóa danh mục thành công!');
         res.redirect('/admin/category');
     } catch (err) {
-        console.error(err);
         req.flash('error_message', 'Lỗi khi xóa: ' + err.message);
         res.redirect('/admin/category');
     }
 });
 
-
-
-// Product list
 router.get('/product', function(req, res, next) {
     Course.find().populate('category').sort({ createdAt: -1 }).lean().then(products => {
         res.render('admin/product/product-list', { 
@@ -346,12 +421,10 @@ router.get('/product', function(req, res, next) {
             products: products 
         });
     }).catch(err => {
-        console.error(err);
         res.redirect('/admin');
     });
 });
 
-// Add Product - GET
 router.get('/product/add', function(req, res, next) {
     Category.find().lean().then(categories => {
          res.render('admin/product/add-product', { 
@@ -361,11 +434,13 @@ router.get('/product/add', function(req, res, next) {
     });
 });
 
-// Add Product - POST
-router.post('/product/add', function(req, res, next) {
+router.post('/product/add', upload.single('thumbnailFile'), function(req, res, next) {
     let { title, category, price, originalPrice, duration, thumbnail, description, isActive, status, level, teachingMethod } = req.body;
+    
+    if (req.file) {
+        thumbnail = '/uploads/' + req.file.filename;
+    }
 
-    // Sanitize originalPrice
     if (originalPrice === "") originalPrice = null;
 
     const newCourse = new Course({
@@ -386,13 +461,11 @@ router.post('/product/add', function(req, res, next) {
         req.flash('success_message', 'Thêm khóa học thành công!');
         res.redirect('/admin/product');
     }).catch(err => {
-         console.error(err);
         req.flash('error_message', 'Lỗi khi thêm khóa học: ' + err.message);
         res.redirect('/admin/product/add');
     });
 });
 
-// Edit Product - GET
 router.get('/product/edit/:id', function(req, res, next) {
     Promise.all([
         Course.findById(req.params.id).lean(),
@@ -408,16 +481,17 @@ router.get('/product/edit/:id', function(req, res, next) {
             categories: categories
         });
     }).catch(err => {
-        console.error(err);
         res.redirect('/admin/product');
     });
 });
 
-// Edit Product - PUT
-router.put('/product/edit/:id', function(req, res, next) {
+router.put('/product/edit/:id', upload.single('thumbnailFile'), function(req, res, next) {
     let { title, category, price, originalPrice, duration, thumbnail, description, isActive, status, level, teachingMethod } = req.body;
     
-    // Sanitize originalPrice
+    if (req.file) {
+        thumbnail = '/uploads/' + req.file.filename;
+    }
+    
     if (originalPrice === "") originalPrice = null;
     
     Course.findByIdAndUpdate(req.params.id, {
@@ -436,15 +510,40 @@ router.put('/product/edit/:id', function(req, res, next) {
         req.flash('success_message', 'Cập nhật khóa học thành công!');
         res.redirect('/admin/product');
     }).catch(err => {
-         console.error(err);
         req.flash('error_message', 'Lỗi khi cập nhật khóa học: ' + err.message);
         res.redirect('/admin/product/edit/' + req.params.id);
     });
 });
 
+// Toggle trạng thái Hoạt động/Tạm ẩn của khóa học
+router.post('/product/toggle/:id', function(req, res, next) {
+    Course.findById(req.params.id).then(course => {
+        if (!course) {
+            req.flash('error_message', 'Không tìm thấy khóa học');
+            return res.redirect('/admin/product');
+        }
+        course.isActive = !course.isActive;
+        return course.save();
+    }).then(() => {
+        req.flash('success_message', 'Đã thay đổi trạng thái khóa học!');
+        res.redirect('/admin/product');
+    }).catch(err => {
+        req.flash('error_message', 'Lỗi khi thay đổi trạng thái: ' + err.message);
+        res.redirect('/admin/product');
+    });
+});
 
+// Xóa khóa học
+router.delete('/product/delete/:id', function(req, res, next) {
+    Course.findByIdAndDelete(req.params.id).then(() => {
+        req.flash('success_message', 'Đã xóa khóa học thành công!');
+        res.redirect('/admin/product');
+    }).catch(err => {
+        req.flash('error_message', 'Lỗi khi xóa khóa học: ' + err.message);
+        res.redirect('/admin/product');
+    });
+});
 
-// Delete User - DELETE
 router.delete('/users/delete/:id', function(req, res, next) {
     if (req.params.id == req.user._id) {
         req.flash('error_message', 'Không thể xóa tài khoản đang đăng nhập!');
@@ -455,13 +554,11 @@ router.delete('/users/delete/:id', function(req, res, next) {
         req.flash('success_message', 'Đã xóa người dùng thành công!');
         res.redirect('back');
     }).catch(err => {
-        console.error(err);
         req.flash('error_message', 'Lỗi khi xóa người dùng: ' + err.message);
         res.redirect('back');
     });
 });
 
-// === CONTACT MANAGEMENT ===
 router.get('/contacts', function(req, res, next) {
     Contact.find().sort({ createdAt: -1 }).lean().then(contacts => {
         res.render('admin/contact/contact-list', {
@@ -469,12 +566,10 @@ router.get('/contacts', function(req, res, next) {
             contacts: contacts
         });
     }).catch(err => {
-        console.error(err);
         res.redirect('/admin');
     });
 });
 
-// Update Contact - PUT
 router.put('/contacts/update/:id', function(req, res, next) {
     const { status, adminNotes } = req.body;
     Contact.findByIdAndUpdate(req.params.id, {
@@ -484,25 +579,21 @@ router.put('/contacts/update/:id', function(req, res, next) {
         req.flash('success_message', 'Cập nhật trạng thái liên hệ thành công!');
         res.redirect('/admin/contacts');
     }).catch(err => {
-        console.error(err);
         req.flash('error_message', 'Lỗi khi cập nhật liên hệ');
         res.redirect('/admin/contacts');
     });
 });
 
-// Delete Contact - DELETE
 router.delete('/contacts/delete/:id', function(req, res, next) {
     Contact.findByIdAndDelete(req.params.id).then(() => {
         req.flash('success_message', 'Đã xóa liên hệ thành công!');
         res.redirect('/admin/contacts');
     }).catch(err => {
-        console.error(err);
         req.flash('error_message', 'Lỗi khi xóa liên hệ');
         res.redirect('/admin/contacts');
     });
 });
 
-// === REVIEW MANAGEMENT ===
 router.get('/reviews', function(req, res, next) {
     Review.find().populate('user').populate('course').sort({ createdAt: -1 }).lean().then(reviews => {
         res.render('admin/review/review-list', {
@@ -510,7 +601,6 @@ router.get('/reviews', function(req, res, next) {
             reviews: reviews
         });
     }).catch(err => {
-        console.error(err);
         res.redirect('/admin');
     });
 });
@@ -524,472 +614,284 @@ router.post('/reviews/toggle/:id', function(req, res, next) {
         req.flash('success_message', 'Đã thay đổi trạng thái đánh giá.');
         res.redirect('/admin/reviews');
     }).catch(err => {
-        console.error(err);
         res.redirect('/admin/reviews');
     });
 });
 
-// === LESSON MANAGEMENT ===
-router.get('/lessons', function(req, res, next) {
-    Lesson.find().populate('course').sort({ createdAt: -1 }).lean().then(lessons => {
-        res.render('admin/lesson/lesson-list', {
-            title: 'Quản lý Bài học',
-            lessons: lessons
+router.delete('/reviews/delete/:id', function(req, res, next) {
+    Review.findByIdAndDelete(req.params.id).then(() => {
+        req.flash('success_message', 'Đã xóa đánh giá thành công!');
+        res.redirect('/admin/reviews');
+    }).catch(err => {
+        req.flash('error_message', 'Lỗi khi xóa đánh giá.');
+        res.redirect('/admin/reviews');
+    });
+});
+
+
+
+
+
+
+
+// QUẢN LÝ BÀI VIẾT (BLOG)
+router.get('/posts', function(req, res, next) {
+    Post.find().populate('author', 'firstName lastName').sort({ createdAt: -1 }).lean().then(posts => {
+        res.render('admin/post/post-list', {
+            title: 'Quản lý Bài viết',
+            posts: posts
         });
-    }).catch(err => {
-        console.error(err);
-        res.redirect('/admin');
-    });
+    }).catch(err => res.redirect('/admin'));
 });
 
-router.get('/lessons/add', function(req, res, next) {
-    Course.find().lean().then(courses => {
-        res.render('admin/lesson/add-lesson', {
-            title: 'Thêm Bài học',
-            courses: courses
-        });
-    });
+router.get('/posts/add', function(req, res, next) {
+    res.render('admin/post/add-post', { title: 'Thêm Bài viết' });
 });
 
-router.post('/lessons/add', function(req, res, next) {
-    const { title, course, videoUrl, content, duration, position, isFree } = req.body;
-    const newLesson = new Lesson({
-        title, course, videoUrl, content, duration, position, 
-        isFree: !!isFree
-    });
-    newLesson.save().then(() => {
-        req.flash('success_message', 'Thêm bài học thành công!');
-        res.redirect('/admin/lessons');
-    }).catch(err => {
-        console.error(err);
-        req.flash('error_message', 'Lỗi: ' + err.message);
-        res.redirect('/admin/lessons/add');
-    });
-});
-
-router.get('/lessons/edit/:id', function(req, res, next) {
-    Promise.all([
-        Lesson.findById(req.params.id).lean(),
-        Course.find().lean()
-    ]).then(([lesson, courses]) => {
-        if (!lesson) return res.redirect('/admin/lessons');
-        res.render('admin/lesson/edit-lesson', {
-            title: 'Sửa Bài học',
-            lesson: lesson,
-            courses: courses
-        });
-    }).catch(err => {
-        console.error(err);
-        res.redirect('/admin/lessons');
-    });
-});
-
-// Edit Lesson - PUT
-router.put('/lessons/edit/:id', function(req, res, next) {
-    const { title, course, videoUrl, content, duration, position, isFree } = req.body;
-    Lesson.findByIdAndUpdate(req.params.id, {
-        title, course, videoUrl, content, duration, position,
-        isFree: !!isFree
-    }).then(() => {
-        req.flash('success_message', 'Cập nhật bài học thành công!');
-        res.redirect('/admin/lessons');
-    }).catch(err => {
-        console.error(err);
-        req.flash('error_message', 'Lỗi: ' + err.message);
-        res.redirect('/admin/lessons/edit/' + req.params.id);
-    });
-});
-
-// Delete Lesson - DELETE
-router.delete('/lessons/delete/:id', function(req, res, next) {
-    Lesson.findByIdAndDelete(req.params.id).then(() => {
-        req.flash('success_message', 'Xóa bài học thành công!');
-        res.redirect('/admin/lessons');
-    }).catch(err => {
-        console.error(err);
-        req.flash('error_message', 'Lỗi: ' + err.message);
-        res.redirect('/admin/lessons');
-    });
-});
-
-
-
-// === QUESTION BANK MANAGEMENT ===
-router.get('/questions', function(req, res, next) {
-    Question.find().sort({ createdAt: -1 }).lean().then(questions => {
-        res.render('admin/question/question-list', {
-            title: 'Ngân hàng Câu hỏi',
-            questions: questions
-        });
-    }).catch(err => {
-        console.error(err);
-        res.redirect('/admin');
-    });
-});
-
-router.get('/questions/add', function(req, res, next) {
-    res.render('admin/question/add-question', { title: 'Thêm Câu hỏi' });
-});
-
-router.post('/questions/add', function(req, res, next) {
-    const { content, type, level, options, correctOption, explanation } = req.body;
+router.post('/posts/add', upload.single('thumbnailFile'), function(req, res, next) {
+    const { title, content, thumbnail, isActive } = req.body;
+    const slug = title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
     
-    // Validate options: options should be array of strings
-    // correctOption is index (0-3)
-
-    let answers = [];
-    if (options && Array.isArray(options)) {
-        answers = options.map((opt, index) => ({
-            text: opt,
-            isCorrect: parseInt(correctOption) === index
-        }));
+    let postThumbnail = thumbnail || '/img/blog-default.jpg';
+    if (req.file) {
+        postThumbnail = '/uploads/' + req.file.filename;
     }
 
-    const newQuestion = new Question({
+    const newPost = new Post({
+        title,
         content,
-        type,
-        level,
-        options: answers,
-        explanation
-    });
-
-    newQuestion.save().then(() => {
-        req.flash('success_message', 'Thêm câu hỏi thành công!');
-        res.redirect('/admin/questions');
-    }).catch(err => {
-         console.error(err);
-        req.flash('error_message', 'Lỗi: ' + err.message);
-        res.redirect('/admin/questions/add');
-    });
-});
-
-// Delete Question - DELETE
-router.delete('/questions/delete/:id', function(req, res, next) {
-    Question.findByIdAndDelete(req.params.id).then(() => {
-        req.flash('success_message', 'Xóa câu hỏi thành công!');
-        res.redirect('/admin/questions');
-    }).catch(err => {
-        console.error(err);
-        req.flash('error_message', 'Lỗi xóa câu hỏi: ' + err.message);
-        res.redirect('/admin/questions');
-    });
-});
-
-
-// === PRACTICE TEST MANAGEMENT ===
-router.get('/tests', function(req, res, next) {
-    PracticeTest.find().populate('category').sort({ createdAt: -1 }).lean().then(tests => {
-        res.render('admin/test/test-list', {
-            title: 'Quản lý Đề luyện thi',
-            tests: tests
-        });
-    }).catch(err => {
-         console.error(err);
-        res.redirect('/admin');
-    });
-});
-
-router.get('/tests/add', function(req, res, next) {
-    Category.find().lean().then(categories => {
-        res.render('admin/test/add-test', {
-            title: 'Tạo Đề thi mới',
-            categories: categories
-        });
-    });
-});
-
-router.post('/tests/add', function(req, res, next) {
-    const { title, category, description, duration, totalScore, passingScore, isActive, isFree } = req.body;
-    
-    const newTest = new PracticeTest({
-        title, category, description, duration, totalScore, passingScore,
-        isActive: !!isActive,
-        isFree: !!isFree,
-        questions: [] // Init empty
-    });
-
-    newTest.save().then(savedTest => {
-        req.flash('success_message', 'Tạo đề thi thành công! Hãy thêm câu hỏi.');
-        // Redirect to manage questions page for this test
-        res.redirect('/admin/tests/manage/' + savedTest._id);
-    }).catch(err => {
-        console.error(err);
-        req.flash('error_message', 'Lỗi: ' + err.message);
-        res.redirect('/admin/tests/add');
-    });
-});
-
-// Edit Test - PUT
-router.put('/tests/edit/:id', async function(req, res, next) {
-    const { title, category, description, duration, totalScore, passingScore, isActive, isFree } = req.body;
-    try {
-        await PracticeTest.findByIdAndUpdate(req.params.id, {
-            title, category, description, duration, totalScore, passingScore,
-            isActive: !!isActive,
-            isFree: !!isFree
-        });
-        req.flash('success_message', 'Cập nhật đề thi thành công!');
-        res.redirect('/admin/tests');
-    } catch (err) {
-        console.error(err);
-        req.flash('error_message', 'Lỗi khi cập nhật: ' + err.message);
-        res.redirect('/admin/tests/edit/' + req.params.id);
-    }
-});
-
-// Manage Questions in Test
-router.get('/tests/manage/:id', async function(req, res, next) {
-    try {
-        const test = await PracticeTest.findById(req.params.id).populate('questions').lean();
-        if(!test) return res.redirect('/admin/tests');
-
-        // Find questions NOT in this test
-        const testQuestionIds = test.questions.map(q => q._id);
-        const availableQuestions = await Question.find({ _id: { $nin: testQuestionIds } }).sort({createdAt: -1}).lean();
-
-        res.render('admin/test/manage-questions', {
-            title: 'Quản lý Câu hỏi - ' + test.title,
-            test: test,
-            availableQuestions: availableQuestions
-        });
-    } catch (err) {
-        console.error(err);
-        res.redirect('/admin/tests');
-    }
-});
-
-// Add Question to Test
-router.post('/tests/:testId/add-question/:questionId', async function(req, res, next) {
-    try {
-        await PracticeTest.findByIdAndUpdate(req.params.testId, {
-            $addToSet: { questions: req.params.questionId }
-        });
-        // req.flash('success_message', 'Đã thêm câu hỏi vào đề.');
-        res.redirect('/admin/tests/manage/' + req.params.testId);
-    } catch (err) {
-        console.error(err);
-        res.redirect('/admin/tests/manage/' + req.params.testId);
-    }
-});
-
-// Remove Question from Test
-router.post('/tests/:testId/remove-question/:questionId', async function(req, res, next) {
-    try {
-        await PracticeTest.findByIdAndUpdate(req.params.testId, {
-            $pull: { questions: req.params.questionId }
-        });
-        res.redirect('/admin/tests/manage/' + req.params.testId);
-    } catch (err) {
-        console.error(err);
-        res.redirect('/admin/tests/manage/' + req.params.testId);
-    }
-});
-
-// Delete Test - DELETE
-router.delete('/tests/delete/:id', function(req, res, next) {
-    PracticeTest.findByIdAndDelete(req.params.id).then(() => {
-        req.flash('success_message', 'Đã xóa đề thi.');
-        res.redirect('/admin/tests');
-    }).catch(err => {
-        console.error(err);
-        req.flash('error_message', 'Lỗi xóa đề thi: ' + err.message);
-        res.redirect('/admin/tests');
-    });
-});
-
-// === RESOURCE MANAGEMENT (Grammar/Vocabulary) ===
-router.get('/resources', function(req, res, next) {
-    Resource.find().sort({ createdAt: -1 }).lean().then(resources => {
-        res.render('admin/resource/resource-list', {
-            title: 'Quản lý Tài nguyên',
-            resources: resources
-        });
-    }).catch(err => {
-        console.error(err);
-        res.redirect('/admin');
-    });
-});
-
-router.get('/resources/add', function(req, res, next) {
-    res.render('admin/resource/add-resource', { title: 'Thêm Tài nguyên' });
-});
-
-router.post('/resources/add', function(req, res, next) {
-    const { title, type, content, thumbnail, isActive } = req.body;
-    const newResource = new Resource({
-        title, type, content, thumbnail,
+        thumbnail: postThumbnail,
+        slug,
+        author: req.user._id,
         isActive: !!isActive
     });
 
-    newResource.save().then(() => {
-        req.flash('success_message', 'Thêm tài nguyên thành công!');
-        res.redirect('/admin/resources');
+    newPost.save().then(() => {
+        req.flash('success_message', 'Đã thêm bài viết mới!');
+        res.redirect('/admin/posts');
     }).catch(err => {
-        console.error(err);
-        req.flash('error_message', 'Lỗi: ' + err.message);
-        res.redirect('/admin/resources/add');
+        req.flash('error_message', 'Lỗi khi thêm bài viết: ' + err.message);
+        res.redirect('/admin/posts/add');
     });
 });
 
-router.get('/resources/edit/:id', function(req, res, next) {
-    Resource.findById(req.params.id).lean().then(resource => {
-        if(!resource) return res.redirect('/admin/resources');
-        res.render('admin/resource/edit-resource', { 
-            title: 'Sửa Tài nguyên',
-            resource: resource
+router.get('/posts/edit/:id', function(req, res, next) {
+    Post.findById(req.params.id).lean().then(post => {
+        if (!post) return res.redirect('/admin/posts');
+        res.render('admin/post/edit-post', {
+            title: 'Chỉnh sửa Bài viết',
+            post: post
         });
-    }).catch(err => {
-        console.error(err);
-        res.redirect('/admin/resources');
-    });
+    }).catch(err => res.redirect('/admin/posts'));
 });
 
-// Edit Resource - PUT
-router.put('/resources/edit/:id', function(req, res, next) {
-    const { title, type, content, thumbnail, isActive } = req.body;
-    
-    Resource.findById(req.params.id).then(resource => {
-        if(!resource) return res.redirect('/admin/resources');
-        
-        resource.title = title;
-        resource.type = type;
-        resource.content = content;
-        resource.thumbnail = thumbnail;
-        resource.isActive = !!isActive;
+router.post('/posts/edit/:id', upload.single('thumbnailFile'), function(req, res, next) {
+    const { title, content, thumbnail, isActive } = req.body;
+    const slug = title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
 
-        return resource.save();
+    let postThumbnail = thumbnail;
+    if (req.file) {
+        postThumbnail = '/uploads/' + req.file.filename;
+    }
+
+    Post.findByIdAndUpdate(req.params.id, {
+        title,
+        content,
+        thumbnail: postThumbnail,
+        slug,
+        isActive: !!isActive
     }).then(() => {
-        req.flash('success_message', 'Cập nhật tài nguyên thành công!');
-        res.redirect('/admin/resources');
+        req.flash('success_message', 'Cập nhật bài viết thành công!');
+        res.redirect('/admin/posts');
     }).catch(err => {
-        console.error(err);
-        req.flash('error_message', 'Lỗi: ' + err.message);
-        res.redirect('/admin/resources/edit/' + req.params.id);
+        req.flash('error_message', 'Lỗi khi cập nhật bài viết');
+        res.redirect('/admin/posts/edit/' + req.params.id);
     });
 });
 
-// Delete Resource - DELETE
-router.delete('/resources/delete/:id', function(req, res, next) {
-    Resource.findByIdAndDelete(req.params.id).then(() => {
-        req.flash('success_message', 'Xóa tài nguyên thành công!');
-        res.redirect('/admin/resources');
+router.delete('/posts/delete/:id', function(req, res, next) {
+    Post.findByIdAndDelete(req.params.id).then(() => {
+        req.flash('success_message', 'Đã xóa bài viết thành công!');
+        res.redirect('/admin/posts');
     }).catch(err => {
-        console.error(err);
-        req.flash('error_message', 'Lỗi: ' + err.message);
-        res.redirect('/admin/resources');
+        req.flash('error_message', 'Lỗi khi xóa bài viết');
+        res.redirect('/admin/posts');
     });
 });
 
-// === ORDER MANAGEMENT ===
-router.get('/orders', async (req, res) => {
-    try {
-        const orders = await Order.find()
-            .populate('user')
-            .populate('items.course')
-            .sort({ createdAt: -1 })
-            .lean();
-        res.render('admin/order/order-list', { title: 'Quản lý Đơn hàng', orders });
-    } catch (err) {
-        console.error(err);
-        res.redirect('/admin');
-    }
-});
-
-router.get('/orders/detail/:id', async (req, res) => {
-    try {
-        const order = await Order.findById(req.params.id)
-            .populate('user')
-            .populate('items.course')
-            .lean();
+// QUẢN LÝ WEBSITE (SETTINGS)
+router.get('/settings', isAdmin, function(req, res, next) {
+    Setting.findOne().lean().then(settings => {
+        if (!settings) settings = {};
         
-        if (!order) {
-            req.flash('error_message', 'Không tìm thấy đơn hàng!');
-            return res.redirect('/admin/orders');
+        // Ensure sub-arrays exist for the form loops
+        if (!settings.features || settings.features.length === 0) {
+            settings.features = [
+                { icon: 'fa-graduation-cap', title: 'Giáo Viên Bản Ngữ', description: 'Đội ngũ giáo viên bản ngữ giàu kinh nghiệm...' },
+                { icon: 'fa-globe', title: 'Học Linh Hoạt', description: 'Lớp học online và offline linh hoạt...' },
+                { icon: 'fa-award', title: 'Cam Kết Đầu Ra', description: 'Chúng tôi cam kết bạn sẽ đạt được điểm số mục tiêu...' },
+                { icon: 'fa-book-open', title: 'Tài Liệu Cập Nhật', description: 'Tài liệu học tập và đề thi thử toàn diện...' }
+            ];
+        }
+        if (!settings.stats || settings.stats.length === 0) {
+            settings.stats = [
+                { value: '15+', label: 'Giảng Viên' },
+                { value: '1500+', label: 'Học Viên' },
+                { value: '50+', label: 'Khóa Học' },
+                { value: '10+', label: 'Năm Kinh Nghiệm' }
+            ];
+        }
+        if (!settings.faqs || settings.faqs.length === 0) {
+            settings.faqs = [
+                { question: 'Câu hỏi 1', answer: 'Câu trả lời 1' },
+                { question: 'Câu hỏi 2', answer: 'Câu trả lời 2' },
+                { question: 'Câu hỏi 3', answer: 'Câu trả lời 3' }
+            ];
         }
 
-        res.render('admin/order/order-detail', { 
-            title: 'Chi tiết Đơn hàng #' + order._id, 
-            order 
+        res.render('admin/settings', {
+            title: 'Quản lý Giao diện',
+            settings: settings
         });
-    } catch (err) {
-        console.error(err);
-        res.redirect('/admin/orders');
-    }
+    }).catch(err => res.redirect('/admin'));
 });
 
-// Delete Order - DELETE
-router.delete('/orders/delete/:id', async (req, res) => {
-    try {
-        await Order.findByIdAndDelete(req.params.id);
-        req.flash('success_message', 'Đã xóa đơn hàng thành công!');
-        res.redirect('/admin/orders');
-    } catch (err) {
-        console.error(err);
-        req.flash('error_message', 'Lỗi khi xóa đơn hàng');
-        res.redirect('/admin/orders');
-    }
-});
+router.post('/settings', isAdmin, upload.fields([
+    { name: 'heroImageFile', maxCount: 1 },
+    { name: 'aboutImageFile', maxCount: 1 }
+]), function(req, res, next) {
+    Setting.findOne().then(settings => {
+        if (!settings) settings = new Setting();
+        
+        const { 
+            logoText, logoIcon, footerAbout, footerAddress, 
+            footerPhone, footerEmail, socialFacebook, socialYoutube, 
+            socialLinkedin, socialTiktok, heroTitle, heroSubtitle, 
+            heroDescription, heroImage, siteTitle, siteDescription,
+            aboutTitle, aboutImage, aboutDescription, aboutPointsRaw,
+            featureIcon, featureTitle, featureDescription,
+            teamTitle, teamSubtitle, teamDescription, 
+            teamCtaTitle, teamCtaDescription,
+            statValue, statLabel,
+            contactTitle, contactSubtitle, contactDescription, 
+            contactMapsUrl, contactWorkingHours,
+            faqQuestion, faqAnswer,
+            coursesTitle, coursesSubtitle, 
+            blogTitle, blogSubtitle, 
+            testimonialTitle, testimonialSubtitle
+        } = req.body;
 
-// Update Order Status - PUT
-router.put('/orders/update-status/:id', async (req, res) => {
-    try {
-        const { status } = req.body;
-        const order = await Order.findById(req.params.id);
-        if (!order) return res.redirect('/admin/orders');
+        // Xử lý ảnh tải lên (nếu có)
+        if (req.files) {
+            if (req.files['heroImageFile']) {
+                settings.heroImage = '/uploads/' + req.files['heroImageFile'][0].filename;
+            } else if (heroImage) {
+                settings.heroImage = heroImage;
+            }
 
-        const oldStatus = order.status;
-        order.status = status;
-        await order.save();
-
-        // Update enrollment in User model if status changed to/from 'completed'
-        if (status === 'completed' && oldStatus !== 'completed') {
-            await User.findByIdAndUpdate(order.user, {
-                $addToSet: { enrolledCourses: { $each: order.items.map(item => item.course) } }
-            });
-        } else if (status !== 'completed' && oldStatus === 'completed') {
-            await User.findByIdAndUpdate(order.user, {
-                $pullAll: { enrolledCourses: order.items.map(item => item.course) }
-            });
+            if (req.files['aboutImageFile']) {
+                settings.aboutImage = '/uploads/' + req.files['aboutImageFile'][0].filename;
+            } else if (aboutImage) {
+                settings.aboutImage = aboutImage;
+            }
+        } else {
+            if (heroImage) settings.heroImage = heroImage;
+            if (aboutImage) settings.aboutImage = aboutImage;
         }
 
-        req.flash('success_message', 'Cập nhật trạng thái đơn hàng và quyền truy cập thành công!');
-        res.redirect('/admin/orders');
-    } catch (err) {
-        console.error(err);
-        req.flash('error_message', 'Lỗi khi cập nhật trạng thái.');
-        res.redirect('/admin/orders');
-    }
-});
+        settings.logoText = logoText;
+        settings.logoIcon = logoIcon;
+        settings.footerAbout = footerAbout;
+        settings.footerAddress = footerAddress;
+        settings.footerPhone = footerPhone;
+        settings.footerEmail = footerEmail;
+        settings.socialFacebook = socialFacebook;
+        settings.socialYoutube = socialYoutube;
+        settings.socialLinkedin = socialLinkedin;
+        settings.socialTiktok = socialTiktok;
+        settings.heroTitle = heroTitle;
+        settings.heroSubtitle = heroSubtitle;
+        settings.heroDescription = heroDescription;
+        settings.heroImage = heroImage;
+        settings.siteTitle = siteTitle;
+        settings.siteDescription = siteDescription;
 
-// === REVENUE REPORT ===
-router.get('/reports/revenue', async (req, res) => {
-    try {
-        // Simple report: Monthly revenue for the current year
-        const startOfYear = new Date(new Date().getFullYear(), 0, 1);
-        const orders = await Order.find({
-            status: 'completed',
-            createdAt: { $gte: startOfYear }
-        }).lean();
+        // Homepage Specific Titles
+        settings.coursesTitle = coursesTitle;
+        settings.coursesSubtitle = coursesSubtitle;
+        settings.blogTitle = blogTitle;
+        settings.blogSubtitle = blogSubtitle;
+        settings.testimonialTitle = testimonialTitle;
+        settings.testimonialSubtitle = testimonialSubtitle;
 
-        let monthlyRevenue = new Array(12).fill(0);
-        let totalRevenue = 0;
+        // Process About Us
+        settings.aboutTitle = aboutTitle;
+        settings.aboutImage = aboutImage;
+        settings.aboutDescription = aboutDescription;
+        if (aboutPointsRaw) {
+            settings.aboutPoints = aboutPointsRaw.split('\n').map(p => p.trim()).filter(p => p !== '');
+        }
 
-        orders.forEach(order => {
-            const month = new Date(order.createdAt).getMonth();
-            monthlyRevenue[month] += order.totalAmount;
-            totalRevenue += order.totalAmount;
-        });
+        // Helper to normalize items to array
+        const toArray = (val) => {
+            if (!val) return [];
+            return Array.isArray(val) ? val : [val];
+        };
 
-        res.render('admin/report/revenue', {
-            title: 'Báo cáo Doanh thu',
-            monthlyRevenue: JSON.stringify(monthlyRevenue),
-            totalRevenue,
-            year: new Date().getFullYear()
-        });
-    } catch (err) {
-        console.error(err);
-        res.redirect('/admin');
-    }
+        const fIcons = toArray(featureIcon);
+        const fTitles = toArray(featureTitle);
+        const fDescs = toArray(featureDescription);
+
+        if (fIcons.length > 0) {
+            settings.features = fIcons.map((icon, i) => ({
+                icon: icon,
+                title: fTitles[i] || '',
+                description: fDescs[i] || ''
+            }));
+        }
+
+        // Process Team
+        settings.teamTitle = teamTitle;
+        settings.teamSubtitle = teamSubtitle;
+        settings.teamDescription = teamDescription;
+        settings.teamCtaTitle = teamCtaTitle;
+        settings.teamCtaDescription = teamCtaDescription;
+
+        // Process Stats
+        const sValues = toArray(statValue);
+        const sLabels = toArray(statLabel);
+        if (sValues.length > 0) {
+            settings.stats = sValues.map((val, i) => ({
+                value: val,
+                label: sLabels[i] || ''
+            }));
+        }
+
+        // Process Contact
+        settings.contactTitle = contactTitle;
+        settings.contactSubtitle = contactSubtitle;
+        settings.contactDescription = contactDescription;
+        settings.contactMapsUrl = contactMapsUrl;
+        settings.contactWorkingHours = contactWorkingHours;
+
+        // Process FAQs
+        const qFaqs = toArray(faqQuestion);
+        const aFaqs = toArray(faqAnswer);
+        if (qFaqs.length > 0) {
+            settings.faqs = qFaqs.map((q, i) => ({
+                question: q,
+                answer: aFaqs[i] || ''
+            }));
+        }
+
+        return settings.save();
+    }).then(() => {
+        req.flash('success_message', 'Cập nhật giao diện website thành công!');
+        res.redirect('/admin/settings');
+    }).catch(err => {
+        req.flash('error_message', 'Lỗi khi cập nhật settings: ' + err.message);
+        res.redirect('/admin/settings');
+    });
 });
 
 module.exports = router;

@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand-lg bg-white navbar-light shadow sticky-top p-0">
     <a href="/" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
-        <h2 class="m-0 text-primary"><i class="fa fa-language me-3"></i>EnglishMaster</h2>
+        <h2 class="m-0 text-primary"><i class="fa {{site.logoIcon}} me-3"></i>{{site.logoText}}</h2>
     </a>
     <button type="button" class="navbar-toggler me-4" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
         <span class="navbar-toggler-icon"></span>
@@ -10,13 +10,12 @@
             <a href="/" class="nav-item nav-link {{#if (eq activePage 'home')}}active{{/if}}">Trang chủ</a>
             <a href="/about" class="nav-item nav-link {{#if (eq activePage 'about')}}active{{/if}}">Giới thiệu</a>
             <a href="/courses" class="nav-item nav-link {{#if (eq activePage 'courses')}}active{{/if}}">Khóa học</a>
-            <a href="/tests" class="nav-item nav-link {{#if (eq activePage 'tests')}}active{{/if}}">Thi thử</a>
+
             <a href="/team" class="nav-item nav-link {{#if (eq activePage 'team')}}active{{/if}}">Đội ngũ</a>
+            <a href="/blog" class="nav-item nav-link {{#if (eq activePage 'blog')}}active{{/if}}">Bài viết</a>
+            <a href="/reviews" class="nav-item nav-link {{#if (eq activePage 'reviews')}}active{{/if}}">Đánh giá</a>
             <a href="/contact" class="nav-item nav-link {{#if (eq activePage 'contact')}}active{{/if}}">Liên hệ</a>
-            <a href="/cart" class="nav-item nav-link position-relative {{#if (eq activePage 'cart')}}active{{/if}}">
-                <i class="fa fa-shopping-cart"></i> Giỏ hàng
-                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary">{{#if session.cart.totalQty}}{{session.cart.totalQty}}{{else}}0{{/if}}</span>
-            </a>
+
         </div>
 
         <!-- LOGIC ẨN/HIỆN TÊN NGƯỜI DÙNG VÀ NÚT ĐĂNG XUẤT -->

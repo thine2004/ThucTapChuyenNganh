@@ -16,14 +16,13 @@ const CourseSchema = new mongoose.Schema({
         min: 0
     },
     originalPrice: {
-        type: Number, // Giá gốc để hiển thị giảm giá
+        type: Number, 
         min: 0
     },
     thumbnail: {
-        type: String, // Đường dẫn ảnh bìa khóa học
-        default: '/img/default-course.jpg'
+        type: String, 
+        default: '/img/course-1.jpg'
     },
-    // Liên kết với Category
     category: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Category',
@@ -39,7 +38,7 @@ const CourseSchema = new mongoose.Schema({
         default: 0
     },
     duration: {
-        type: Number, // Tổng thời lượng (phút hoặc giờ)
+        type: Number, 
         default: 0
     },
     averageRating: {
@@ -50,12 +49,12 @@ const CourseSchema = new mongoose.Schema({
     },
     isActive: {
         type: Boolean,
-        default: true // Khóa học có đang được bán không
+        default: true 
     },
     status: {
         type: String,
         enum: ['available', 'sold_out'],
-        default: 'available' // available: Còn khóa, sold_out: Hết khóa
+        default: 'available' 
     },
     teachingMethod: {
         type: String,
@@ -66,7 +65,6 @@ const CourseSchema = new mongoose.Schema({
     timestamps: true
 });
 
-// Add indexes for better query performance
 CourseSchema.index({ category: 1 });
 CourseSchema.index({ isActive: 1 });
 CourseSchema.index({ level: 1 });

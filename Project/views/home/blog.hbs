@@ -1,0 +1,34 @@
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+            <h6 class="section-title bg-white text-center text-primary px-3">Bài Viết</h6>
+            <h1 class="mb-5">Kiến Thức & Kinh Nghiệm Học Tiếng Anh</h1>
+        </div>
+        <div class="row g-4">
+            {{#each posts}}
+            <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                <div class="blog-item bg-light">
+                    <div class="position-relative overflow-hidden">
+                        <img class="img-fluid w-100" src="{{this.thumbnail}}" alt="{{this.title}}" style="height: 250px; object-fit: cover;">
+                        <div class="bg-white text-primary fw-bold position-absolute bottom-0 end-0 m-3 py-1 px-2">
+                            {{formatDate this.createdAt}}
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <div class="d-flex mb-3">
+                            <small class="me-3"><i class="fa fa-user text-primary me-2"></i>{{this.author.firstName}} {{this.author.lastName}}</small>
+                        </div>
+                        <h4 class="mb-3">{{this.title}}</h4>
+                        <p>{{truncate this.content 100}}</p>
+                        <a class="text-uppercase" href="/blog/{{this.slug}}">Đọc Thêm <i class="fa fa-arrow-right ms-2"></i></a>
+                    </div>
+                </div>
+            </div>
+            {{else}}
+            <div class="col-12 text-center">
+                <p>Hiện chưa có bài viết nào.</p>
+            </div>
+            {{/each}}
+        </div>
+    </div>
+</div>

@@ -1,0 +1,44 @@
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Thêm Bài viết Mới</h1>
+    <a href="/admin/posts" class="btn btn-secondary shadow-sm">Quay lại danh sách</a>
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-body">
+        <form action="/admin/posts/add" method="POST" enctype="multipart/form-data">
+            <div class="form-group mb-3">
+                <label for="title">Tiêu đề bài viết</label>
+                <input type="text" name="title" id="title" class="form-control" placeholder="Nhập tiêu đề..." required>
+            </div>
+            
+            <div class="form-group mb-3">
+                <label for="thumbnailFile">Ảnh bìa (Tải lên)</label>
+                <input type="file" name="thumbnailFile" id="thumbnailFile" class="form-control-file mb-2">
+                <label for="thumbnail" class="small text-muted">Hoặc nhập Link Ảnh</label>
+                <input type="text" name="thumbnail" id="thumbnail" class="form-control" placeholder="https://example.com/image.jpg">
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="content">Nội dung bài viết</label>
+                <textarea name="content" id="content" class="form-control" rows="15" placeholder="Nhập nội dung bài viết (có thể dùng HTML)..." required></textarea>
+            </div>
+
+            <div class="form-group mb-4">
+                <label class="font-weight-bold">Trạng thái hiển thị</label>
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="isActive" name="isActive" value="true" checked>
+                    <label class="form-check-label" for="isActive">Hiển thị bài viết ngay sau khi đăng</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa fa-save"></i> Đăng bài viết
+                </button>
+                <a href="/admin/posts" class="btn btn-secondary">
+                    <i class="fa fa-times"></i> Hủy
+                </a>
+            </div>
+        </form>
+    </div>
+</div>

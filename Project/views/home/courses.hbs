@@ -2,6 +2,7 @@
 <div class="container-xxl py-3">
     <div class="container">
         <form action="/courses" method="GET" id="filterForm">
+        <input type="hidden" name="page" id="pageInput" value="{{pagination.currentPage}}">
         <div class="row g-3 align-items-center">
             <div class="col-lg-6">
                 <div class="d-flex align-items-center">
@@ -40,13 +41,25 @@
                     <div class="card-body">
                         <!-- Price Filter -->
                         <div class="mb-4">
-                            <h6 class="mb-3">Khoảng giá</h6>
-                            <div class="d-flex justify-content-between mb-2">
-                                <span id="minPriceDisplay">{{#if filters.minPrice}}{{filters.minPrice}}{{else}}0{{/if}}₫</span>
-                                <span id="maxPriceDisplay">{{#if filters.maxPrice}}{{filters.maxPrice}}{{else}}10.000.000{{/if}}₫</span>
+                            <h6 class="mb-3">Khoảng giá (VNĐ)</h6>
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <small>Từ:</small>
+                                    <small class="text-primary fw-bold" id="minPriceDisplay">{{#if filters.minPrice}}{{formatCurrency filters.minPrice}}{{else}}0₫{{/if}}</small>
+                                </div>
+                                <input type="range" name="minPrice" class="form-range" min="0" max="10000000" step="10000" 
+                                    value="{{#if filters.minPrice}}{{filters.minPrice}}{{else}}0{{/if}}" 
+                                    oninput="document.getElementById('minPriceDisplay').innerText = Number(this.value).toLocaleString('vi-VN') + '₫'">
                             </div>
-                            <input type="range" name="maxPrice" class="form-range" min="0" max="10000000" step="500000" value="{{#if filters.maxPrice}}{{filters.maxPrice}}{{else}}10000000{{/if}}" oninput="document.getElementById('maxPriceDisplay').innerText = Number(this.value).toLocaleString('vi-VN') + '₫'">
-                            <input type="hidden" name="minPrice" value="0">
+                            <div class="mb-1">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <small>Đến:</small>
+                                    <small class="text-primary fw-bold" id="maxPriceDisplay">{{#if filters.maxPrice}}{{formatCurrency filters.maxPrice}}{{else}}10.000.000₫{{/if}}</small>
+                                </div>
+                                <input type="range" name="maxPrice" class="form-range" min="0" max="10000000" step="10000" 
+                                    value="{{#if filters.maxPrice}}{{filters.maxPrice}}{{else}}10000000{{/if}}" 
+                                    oninput="document.getElementById('maxPriceDisplay').innerText = Number(this.value).toLocaleString('vi-VN') + '₫'">
+                            </div>
                         </div>
 
                         <!-- Exam Type Filter -->
@@ -136,16 +149,15 @@
                                 {{/if}}
                                 
                                 <div class="w-100 d-flex justify-content-center position-absolute bottom-0 start-0 mb-4">
-                                    <a href="/courses/{{this._id}}" class="flex-shrink-0 btn btn-sm btn-primary px-3 border-end" style="border-radius: 30px 0 0 30px;">Chi tiết</a>
                                     {{#if_eq this.status 'available'}}
-                                    <form action="/cart/add/{{this._id}}" method="POST" class="flex-shrink-0 m-0 p-0">
-                                        <button type="submit" class="btn btn-sm btn-primary px-3" style="border-radius: 0 30px 30px 0;">
-                                            <i class="fa fa-shopping-cart"></i>
+                                    <form action="/courses/{{this._id}}/enroll" method="POST" class="flex-shrink-0 m-0 p-0">
+                                        <button type="submit" class="btn btn-primary px-4 shadow-sm" style="border-radius: 30px;">
+                                            <i class="fa fa-shopping-cart me-2"></i>Đăng ký ngay
                                         </button>
                                     </form>
                                     {{else}}
-                                    <button class="btn btn-sm btn-secondary px-3" style="border-radius: 0 30px 30px 0;" disabled>
-                                        <i class="fa fa-ban"></i>
+                                    <button class="btn btn-secondary px-4" style="border-radius: 30px;" disabled>
+                                        <i class="fa fa-ban me-2"></i>Hết chỗ
                                     </button>
                                     {{/if_eq}}
                                 </div>
@@ -181,22 +193,37 @@
                     {{/each}}
                 </div>
 
-                <!-- Pagination (Mockup) -->
-                {{#if courses.length}}
+                <!-- Pagination -->
+                {{#if pagination.totalPages}}
+                {{#if (gt pagination.totalPages 1)}}
                 <nav aria-label="Page navigation" class="mt-5">
                     <ul class="pagination justify-content-center">
-                        <li class="page-item disabled">
-                            <a class="page-link" href="#" tabindex="-1">Trước</a>
+                        <li class="page-item {{#unless pagination.hasPrev}}disabled{{/unless}}">
+                            <a class="page-link" href="javascript:void(0)" onclick="changePage({{pagination.prevPage}})">Trước</a>
                         </li>
-                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item">
-                            <a class="page-link" href="#">Tiếp</a>
+                        
+                        {{#each pagination.pages}}
+                        <li class="page-item {{#if (eq this ../pagination.currentPage)}}active{{/if}}">
+                            <a class="page-link" href="javascript:void(0)" onclick="changePage({{this}})">{{this}}</a>
+                        </li>
+                        {{/each}}
+
+                        <li class="page-item {{#unless pagination.hasNext}}disabled{{/unless}}">
+                            <a class="page-link" href="javascript:void(0)" onclick="changePage({{pagination.nextPage}})">Tiếp</a>
                         </li>
                     </ul>
                 </nav>
+                {{/if}}
                 {{/if}}
             </div>
         </div>
     </div>
 </div>
+
+<script>
+function changePage(page) {
+    if (page < 1) return;
+    document.getElementById('pageInput').value = page;
+    document.getElementById('filterForm').submit();
+}
+</script>

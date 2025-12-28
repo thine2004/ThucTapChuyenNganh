@@ -1,0 +1,41 @@
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card border-0 shadow-lg">
+                <div class="card-header bg-dark text-white p-4 text-center">
+                    <h3 class="mb-0">Admin CP Login</h3>
+                </div>
+                <div class="card-body p-4">
+                    {{#if success_message}}
+                        <div class="alert alert-success">{{success_message}}</div>
+                    {{/if}}
+                    
+                    {{#if error_message}}
+                        <div class="alert alert-danger">{{error_message}}</div>
+                    {{/if}}
+                    
+                    <form action="/admin/login" method="POST">
+                        <div class="mb-3">
+                            <label for="email" class="form-label font-weight-bold">Admin Email</label>
+                            <input type="email" name="email" id="email" class="form-control border-0 bg-light" placeholder="admin@example.com">
+                        </div>
+                    
+                        <div class="mb-4">
+                            <label for="password" class="form-label font-weight-bold">Password</label>
+                            <input type="password" name="password" id="password" class="form-control border-0 bg-light" placeholder="••••••••">
+                        </div>
+                    
+                        <button type="submit" class="btn btn-dark w-100 py-2 shadow-sm">
+                            Login to Dashboard
+                        </button>
+                    </form>
+                    
+                    <div class="mt-4 text-center">
+                        <p class="text-muted small">Need an admin account? <a href="/admin/register" class="text-dark font-weight-bold">Register here</a></p>
+                        <a href="/" class="text-muted small">Back to Homepage</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

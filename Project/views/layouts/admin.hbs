@@ -12,7 +12,7 @@
     <!-- Bootstrap core CSS-->
     <link href="/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <!-- Custom fonts-->
-    <link href="/vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
     <!-- DataTables CSS-->
     <link href="/vendor/datatables/dataTables.bootstrap4.css" rel="stylesheet">
     <!-- SB Admin CSS-->
@@ -72,7 +72,8 @@
     </style>
 </head>
 
-<body class="fixed-nav sticky-footer bg-light" id="page-top">
+<body class="{{#unless hideAdminNav}}fixed-nav{{/unless}} sticky-footer bg-light" id="page-top">
+{{#unless hideAdminNav}}
 <!-- Navigation-->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top" id="mainNav">
     <a class="navbar-brand" href="/admin{{loginParams}}">
@@ -108,23 +109,6 @@
                 </ul>
             </li>
 
-            </li>
-
-            <!-- Nhóm Quản lý Luyện thi -->
-            <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Quản lý Luyện thi">
-                <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#collapseExams" data-parent="#exampleAccordion">
-                    <i class="fa fa-fw fa-pencil-square-o"></i>
-                    <span class="nav-link-text">Quản lý Luyện thi</span>
-                </a>
-                <ul class="sidenav-second-level collapse" id="collapseExams">
-                    <li>
-                        <a href="/admin/questions">Ngân hàng Câu hỏi</a>
-                    </li>
-                    <li>
-                         <a href="/admin/tests">Đề thi / Bài kiểm tra</a>
-                    </li>
-                </ul>
-            </li>
 
             <!-- Nhóm Quản lý Khác -->
             <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Quản lý khác">
@@ -137,13 +121,13 @@
                         <a href="/admin/contacts">Liên hệ</a>
                     </li>
                     <li>
+                         <a href="/admin/posts">Quản lý Bài viết</a>
+                    </li>
+                    <li>
                          <a href="/admin/reviews">Đánh giá & Bình luận</a>
                     </li>
                     <li>
-                         <a href="/admin/resources">Quản lý Tài nguyên</a>
-                    </li>
-                     <li>
-                        <a href="/admin/lessons">Bài học</a>
+                         <a href="/admin/settings">Quản lý Website</a>
                     </li>
                 </ul>
             </li>
@@ -168,21 +152,9 @@
                 </ul>
             </li>
 
-            <!-- Quản lý Đơn hàng -->
-            <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Quản lý Đơn hàng">
-                <a class="nav-link" href="/admin/orders">
-                    <i class="fa fa-fw fa-shopping-cart"></i>
-                    <span class="nav-link-text">Quản lý Đơn hàng</span>
-                </a>
-            </li>
 
-            <!-- Báo cáo -->
-            <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Báo cáo">
-                <a class="nav-link" href="/admin/reports/revenue">
-                    <i class="fa fa-fw fa-area-chart"></i>
-                    <span class="nav-link-text">Báo cáo doanh thu</span>
-                </a>
-            </li>
+
+
         </ul>
 
         <!-- Nút thu gọn Sidebar -->
@@ -242,9 +214,11 @@
         </ul>
     </div>
 </nav>
+{{/unless}}
 
-<div class="content-wrapper">
+<div class="content-wrapper" {{#if hideAdminNav}}style="margin-left: 0;"{{/if}}>
     <div class="container-fluid">
+        {{#unless hideAdminNav}}
         <!-- Breadcrumbs tự động -->
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
@@ -254,7 +228,9 @@
                 <li class="breadcrumb-item active">{{title}}</li>
             {{/if}}
         </ol>
+        {{/unless}}
 
+        {{#unless hideAdminNav}}
         <!-- Flash Messages -->
         {{#if success_message}}
             <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -273,6 +249,7 @@
                 </button>
             </div>
         {{/if}}
+        {{/unless}}
 
         <!-- Main Content -->
         {{{body}}}
@@ -305,7 +282,7 @@
                 <div class="modal-footer">
                     <button class="btn btn-secondary" type="button" data-dismiss="modal">Hủy</button>
                     <!-- Link logout chuẩn -->
-                    <a class="btn btn-primary" href="/logout">Đăng xuất</a>
+                    <a class="btn btn-primary" href="/admin/logout">Đăng xuất</a>
                 </div>
             </div>
         </div>

@@ -1,0 +1,55 @@
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Quản lý Bài viết</h1>
+    <a href="/admin/posts/add" class="btn btn-primary shadow-sm"><i class="fas fa-plus fa-sm text-white-50"></i> Thêm bài viết mới</a>
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Danh sách Bài viết</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped" id="dataTablePosts" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th style="width: 100px;">Ảnh bìa</th>
+                        <th>Tiêu đề</th>
+                        <th>Tác giả</th>
+                        <th>Ngày đăng</th>
+                        <th>Trạng thái</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each posts}}
+                    <tr>
+                        <td>
+                            <img src="{{this.thumbnail}}" alt="" style="width: 80px; height: 50px; object-fit: cover; border-radius: 4px;">
+                        </td>
+                        <td>{{this.title}}</td>
+                        <td>{{this.author.firstName}} {{this.author.lastName}}</td>
+                        <td>{{formatDate this.createdAt}}</td>
+                        <td>
+                            {{#if this.isActive}}
+                                <span class="badge badge-success">Hiện</span>
+                            {{else}}
+                                <span class="badge badge-secondary">Ẩn</span>
+                            {{/if}}
+                        </td>
+                        <td>
+                            <a href="/admin/posts/edit/{{this._id}}" class="btn btn-sm btn-info">Sửa</a>
+                            <form action="/admin/posts/delete/{{this._id}}?_method=DELETE" method="POST" style="display:inline;" onsubmit="return confirm('Bạn có chắc muốn xóa bài viết này?')">
+                                <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {{else}}
+                    <tr>
+                        <td colspan="6" class="text-center">Chưa có bài viết nào.</td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
